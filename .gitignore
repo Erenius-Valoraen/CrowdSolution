@@ -15,3 +15,5 @@ config.toml
 *.p8
 *.pem
 secrets*
+*.db
+*.sqlite

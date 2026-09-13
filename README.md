@@ -1,48 +1,194 @@
-# CrowdSolution
+# CrowdSolution — Is This Legit?
 
-PivotHacks 2026 project.
+**PivotHacks 2026 Project**
 
-**Problem:** people struggle to decide which online claims, recommendations, reviews, sources, or generated content to trust.
+CrowdSolution is a real-time fact-checking and risk-rating engine built for university students living independently for the first time. Paste a rental listing, job offer, lease clause, bank message, or claim: it checks every detail against official data first, then the web, and returns a blunt risk verdict with verified sources, categorized findings, and an actionable checklist.
 
-**Who it's for (after Pivot 1):** a university student living on their own for the first time, making decisions about housing, jobs, school, and money.
+---
 
-**What it does:** paste a rental listing, job offer, bank message, or post. It checks every claim against official data first, then the web, and returns a risk rating with sources. See [legit/README.md](legit/README.md).
+## The Problem & The User
 
-```bash
-python -m legit "Cozy 2BR near campus, $650/month, send the deposit by Zelle and I'll mail the keys."
-```
+- **The Problem:** Students constantly struggle to decide which online claims, recommendations, rental listings, job offers, or financial messages to trust.
+- **The User (Maya, 19):** Living on her own for the first time with a tight student budget. She doesn't have experience signing leases or knowing local rent baselines. Decisions like e-transferring a deposit or paying an upfront "training fee" can cost money she cannot replace.
+- **The Core Rule:** We do not output an arbitrary "trust score" like 62%. We classify clear risk (`HIGH RISK`, `BE CAREFUL`, `NO RED FLAGS FOUND`), cite clickable official sources, and tell students exactly what to do before paying.
 
-## How we got here
+---
+
+## How We Got Here
 
 | Stage | Direction |
 |---|---|
-| Start | "Was it true when they said it?" Check statistics in speeches and threads against official data as published on that day. |
-| Pivot 1 | The user became a student living alone. We widened from statistics to "is this legit?", adding registries, price benchmarks, complaint data, scam patterns, and web fallback. The statistics engine became one checker. |
+| **Start** | *"Was it true when they said it?"* Checked statistical claims in speeches and articles against official point-in-time US economic data. |
+| **Pivot 1** | Widened focus to the university student living alone. Added rental registries, price benchmarks, complaint registries, scam patterns, and web fallback. The statistics engine became one checker in a comprehensive screening system. |
+| **Current Stage** | **Frontend JSON API.** Built a high-performance FastAPI server with CORS, persistent audit history, and structured JSON contracts designed for direct consumption by web and mobile frontends. |
 
-## Repo layout
+---
 
-| Path | What it is |
+## Repo Layout
+
+| Path | Description |
 |---|---|
-| `legit/` | The checker: extraction, evidence checkers, web fallback, report |
-| `legit/stats/` | Point-in-time statistics engine |
-| `docs/DATA_ACCESS.md` | Connect to Snowflake and query the data |
-| `sql/setup/` | Account, teammate, token, and benchmark table setup |
-| `sql/queries/` | Reusable queries to run in Snowsight |
-| `scripts/` | Connection setup and data exploration helpers |
-| `tests/` | Unit tests, plus live tests that skip without Snowflake |
+| `api/` | **FastAPI Server**: REST API endpoints, Pydantic schemas, persistent audit history, and JSON contract formatter |
+| `legit/` | **Verification Engine**: AI extraction, evidence checkers, scam pattern matching, and report generator |
+| `legit/checkers/` | Official checkers (FTC/CAFC patterns, Census/BLS benchmarks, college data, registry, web search) |
+| `legit/stats/` | Point-in-time statistics engine for historical claim verification |
+| `tests/` | Comprehensive test suite (unit tests, API integration tests, and live HTTP test suite) |
+| `run_server.py` | One-click launcher for the API server |
+| `docs/DATA_ACCESS.md` | Connection details and schema notes |
+| `scripts/` | Helper exploration scripts |
 
-## Quick start
+---
 
+## Frontend JSON API
+
+The API runs on FastAPI with CORS enabled for all origins (`*`), making it effortless to integrate with **Next.js, Vite, React, Vue, or React Native**.
+
+### Server Status
+- **Default Address:** `http://127.0.0.1:8000`
+- **Interactive Swagger Docs:** `http://127.0.0.1:8000/docs`
+- **Alternative ReDoc UI:** `http://127.0.0.1:8000/redoc`
+
+### API Endpoints Reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/verify` | **Primary verification endpoint.** Receives text, returns overall risk, counts, action checklist, and grouped findings. |
+| `GET` | `/api/scans/{scan_id}` | **Permalink lookup.** Fetches a previously verified scan by ID (ideal for `app.com/r/{id}`). |
+| `GET` | `/api/history` | **Dashboard feed.** Returns recent scans with status badges, context, and timestamps. |
+| `GET` | `/api/examples` | **1-Click demo payloads.** Returns 5 realistic student cases (rental scam, job scam, fake check, legit sublet, stats). |
+| `GET` | `/api/health` | **Health check.** Confirms server status and Groq LLM availability. |
+
+---
+
+## Frontend JSON Contract
+
+### Request: `POST /api/verify`
+```json
+{
+  "text": "Cozy 2BR near campus, $650/month. I'm abroad, send the deposit by Zelle and I'll mail the keys.",
+  "seen_on": "2026-09-13",
+  "offline": true
+}
+```
+> **Tip:** Setting `"offline": true` completes in ~2–3 seconds using official guidance and pattern rules without consuming web search tokens.
+
+### Response (Tailored for Frontend UI)
+```json
+{
+  "id": "chk_24f3eb208a",
+  "created_at": "2026-09-13T16:40:49.123Z",
+  "overall": "HIGH RISK",
+  "overall_badge": {
+    "label": "HIGH RISK",
+    "color": "red",
+    "message": "High risk detected. Do not send money, deposits, or sensitive personal information."
+  },
+  "counts": {
+    "red_flag": 2,
+    "caution": 1,
+    "ok": 0,
+    "info": 0,
+    "unverified": 0,
+    "total": 3
+  },
+  "summary": "A rental listing for a 2-bedroom apartment near campus that requests a deposit via Zelle.",
+  "context": "housing",
+  "location": {
+    "city": null,
+    "region": null,
+    "country": null,
+    "label": ""
+  },
+  "action_checklist": [
+    "Never send a deposit, holding fee, or rent by Zelle, e-transfer, wire, or gift cards.",
+    "Demand an in-person walkthrough or live interactive video call. If they refuse, walk away.",
+    "Ask for their full legal name and check the property address on municipal rental licensing records.",
+    "Reverse-image search all listing photos to see if they are copied from legitimate real estate sites.",
+    "Remember: in Ontario and many jurisdictions, damage deposits are illegal—only first/last month is permitted."
+  ],
+  "findings": [
+    {
+      "id": 1,
+      "kind": "pattern",
+      "status": "red_flag",
+      "status_label": "RED FLAG",
+      "color": "red",
+      "title": "Hard-to-reverse payment method",
+      "quote": "send the deposit by Zelle",
+      "summary": "Zelle is a hard-to-reverse payment method commonly used in rental scams to steal deposits...",
+      "checker": "patterns",
+      "evidence": [
+        {
+          "source": "FTC: Rental listing scams",
+          "detail": "Official consumer-protection guidance describing this warning sign",
+          "kind": "guidance",
+          "kind_label": "official guidance",
+          "url": "https://consumer.ftc.gov/articles/rental-listing-scams"
+        }
+      ],
+      "data": {
+        "pattern": "unusual_payment_method"
+      }
+    }
+  ],
+  "grouped_findings": {
+    "red_flags": [ /* array of red flag findings */ ],
+    "cautions": [ /* array of caution findings */ ],
+    "ok": [ /* array of verified findings */ ],
+    "context": [ /* informative context items */ ],
+    "unverified": [ /* unconfirmed claims */ ]
+  },
+  "notes": []
+}
+```
+
+---
+
+## Quick Start
+
+### 1. Installation
 ```bash
 pip install -r requirements.txt
 ```
 
+### 2. Configure Environment
+Create a `.env` file in the repo root:
+```text
+GROQ_API_KEY=your_groq_api_key_here
+```
+*(Without a key, built-in keyword rules still catch common rental scams and money requests.)*
+
+### 3. Launch the API Server
 ```bash
-python scripts/configure_snowflake.py
+python run_server.py
+```
+Open `http://127.0.0.1:8000/docs` in your browser to test endpoints interactively.
+
+### 4. CLI Usage (Optional)
+You can also run checks directly from the command line:
+```bash
+python -m legit "Cozy 2BR near campus, $650/month, send deposit by Zelle."
+```
+Or run interactive terminal demo mode:
+```bash
+python -m legit
 ```
 
-```bash
-python -m unittest discover -s tests
-```
+---
 
-Put `GROQ_API_KEY=...` in a `.env` file in the repo root to enable AI extraction and web search.
+## Testing & Verification
+
+The codebase includes full automated test coverage:
+
+- **Unit Tests (76 tests):**
+  ```bash
+  python -m unittest discover -s tests
+  ```
+- **API Endpoint Tests:**
+  ```bash
+  python tests/test_api.py
+  ```
+- **Live HTTP Server Integration Tests:**
+  ```bash
+  python tests/live_test.py
+  ```
