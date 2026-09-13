@@ -5,6 +5,7 @@ CrowdSolution is a PivotHacks 2026 project: an "is this legit?" checker for univ
 ## Start here
 
 - **Building the frontend or browser extension:** read [docs/FRONTEND_GUIDE.md](docs/FRONTEND_GUIDE.md). It has the full API contract, every `data` shape, rendering guidance, limits, and real responses in `docs/examples/`.
+- **The web app already exists** in `frontend/` (plain HTML, CSS, and JavaScript, no build step), served by the API at `/`. `frontend/app.js` renders each section from `checker` and `data`; `frontend/charts.js` has the donut, bar, and column charts. Extend it rather than starting over unless the user asks for a framework.
 - **Working on the checking engine:** read [legit/README.md](legit/README.md).
 - **Querying the data directly:** read [docs/DATA_ACCESS.md](docs/DATA_ACCESS.md).
 
@@ -12,7 +13,7 @@ CrowdSolution is a PivotHacks 2026 project: an "is this legit?" checker for univ
 
 ```bash
 pip install -r requirements.txt
-python run_server.py          # API on http://127.0.0.1:8000, docs at /docs
+python run_server.py          # web app at http://127.0.0.1:8000, API under /api, docs at /docs
 python -m legit               # terminal UI: paste anything
 python -m unittest discover -s tests
 ```

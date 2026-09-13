@@ -7,8 +7,12 @@ from __future__ import annotations
 import os
 from typing import Any
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, Response
+from fastapi.staticfiles import StaticFiles
 
 from legit import community, config, llm
 
@@ -33,7 +37,23 @@ app.add_middleware(
 )
 
 
-@app.get("/")
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def web_app() -> FileResponse:
+    """The Legit Check web app."""
+    return FileResponse(FRONTEND_DIR / "index.html")
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon() -> Response:
+    """The page sets an inline SVG icon; answer the browser's default request quietly."""
+    return Response(status_code=204)
+
+
+@app.get("/api")
 def root() -> dict[str, str]:
     return {
         "name": "CrowdSolution Verification API",
@@ -134,6 +154,24 @@ def get_sample_examples() -> list[dict[str, str]]:
             "title": "Economic Statistics Claim",
             "category": "finance",
             "text": "The US unemployment rate is currently 4.0% according to official labor data.",
+        },
+        {
+            "id": "ex_college_claims",
+            "title": "Reddit Comment About Colleges",
+            "category": "school",
+            "text": "Honestly UCLA is way better than UT Austin. It's even cheaper for out-of-state students and almost everyone graduates. And forget MIT, they only admit like 4% of people.",
+        },
+        {
+            "id": "ex_majors",
+            "title": "TikTok About Majors and Salaries",
+            "category": "school",
+            "text": "If you do CS at UT Austin you'll make six figures right out of school. Computer science majors make about $90,000 four years after graduating, while psychology majors barely make $40k.",
+        },
+        {
+            "id": "ex_bank_phishing",
+            "title": "Text From 'Your Bank'",
+            "category": "finance",
+            "text": "Chase Bank Student Offer: open a Chase High-Yield Student Savings account today and earn 12% APY, guaranteed. Limited spots! Verify your identity at chase-student-rewards.com with your online banking login.",
         },
     ]
 

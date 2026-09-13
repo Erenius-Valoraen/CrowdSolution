@@ -157,11 +157,11 @@ GROQ_API_KEY=your_groq_api_key_here
 ```
 *(Without a key, built-in keyword rules still catch common rental scams and money requests.)*
 
-### 3. Launch the API Server
+### 3. Launch the Web App and API
 ```bash
 python run_server.py
 ```
-Open `http://127.0.0.1:8000/docs` in your browser to test endpoints interactively.
+Open `http://127.0.0.1:8000` for the web app: paste text and see the verdict, charts, school comparisons, official numbers, student reports, and sources. The API docs are at `http://127.0.0.1:8000/docs`.
 
 ### 4. CLI Usage (Optional)
 You can also run checks directly from the command line:
