@@ -549,7 +549,7 @@ function checklistSection(items) {
       h('input', { type: 'checkbox', id: `todo-${i}` }), h('label', { for: `todo-${i}` }, item)))));
 }
 
-function renderReport(data, text, { autoSpeak = false } = {}) {
+function renderReport(data, text) {
   stopSpeaking();
   currentVideo = data.video || null;
   const speakerEl = speakerPanel(data);
@@ -587,7 +587,6 @@ function renderReport(data, text, { autoSpeak = false } = {}) {
   revealOnScroll(els.results);
   trackSections(menu);
   els.results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  if (autoSpeak) speakSummary(data, speakerEl, { auto: true });
 }
 
 // ---------- motion and navigation ----------
@@ -690,14 +689,8 @@ async function verify() {
   if (!text) return;
   showError('');
   els.results.hidden = true;
-  const spoken = voiceInputPending;  // asked by voice, so answer out loud too
-  voiceInputPending = false;
   stopSpeaking();
   setLoading(true);
-  if (spoken) {
-    els.loadingHint.textContent = "We'll read a short summary out loud when the results are ready.";
-    els.loadingHint.hidden = false;
-  }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), isYouTubeLink(text) ? 300000 : 180000);
   try {
@@ -707,7 +700,7 @@ async function verify() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.detail ? String(data.detail) : `Something went wrong (${res.status}).`);
-    renderReport(data, text, { autoSpeak: spoken });
+    renderReport(data, text);
     history.replaceState(null, '', `?scan=${encodeURIComponent(data.id)}`);
     loadHistory();
   } catch (err) {
@@ -900,7 +893,6 @@ function insertAtCursor(words) {
   const caret = (before + lead + words).length;
   t.focus();
   t.setSelectionRange(caret, caret);
-  voiceInputPending = true;
   onInput();
 }
 
@@ -922,7 +914,6 @@ async function initVoice() {
 // Reads a short summary of the results aloud, sentence by sentence, with captions. Uses the server's natural voice
 // (Groq text-to-speech) when it's enabled, otherwise the browser's built-in voice.
 
-let voiceInputPending = false;
 let serverVoice = 'unknown';  // 'yes' once /api/speak works, 'no' once it doesn't
 const speaker = { token: 0, panel: null, sentences: [], index: 0, engine: null, clips: [], audio: null, finish: null, state: 'idle' };
 const SPEAKER_LABELS = {

@@ -112,7 +112,7 @@ Errors, each with a `detail` you can show as is: `415` unsupported type, `400` e
 
 #### Spoken results: `POST /api/scans/{id}/spoken-summary` and `POST /api/speak`
 
-When a student asks by voice, answer out loud too. After the results render, call `spoken-summary` for the scan: it returns `{"text", "source"}`, a 70 to 130 word summary written for listening (verdict, the key warnings with real numbers, what to do next). `source` is `ai` (Cortex, saved with the scan so replays match) or `template` (built from the results when no model is available). Show the text as captions while it plays.
+Offer a "Listen to a summary" button on the results; only read aloud when the student presses it (the web app never plays audio on its own). On click, call `spoken-summary` for the scan: it returns `{"text", "source"}`, a 70 to 130 word summary written for listening (verdict, the key warnings with real numbers, what to do next). `source` is `ai` (Cortex, saved with the scan so replays match) or `template` (built from the results when no model is available). Show the text as captions while it plays.
 
 For audio, send one sentence at a time to `/api/speak` as `{"text": "..."}` (max 1,500 characters) and play the WAV it returns. It uses Groq text-to-speech (`canopylabs/orpheus-v1-english`, voice set by `GROQ_TTS_VOICE`). If it returns `503`, the model isn't enabled for the server's Groq account (its terms must be accepted once in the Groq console), so use the browser's `speechSynthesis` instead. Browsers only play sound after the student has interacted with the page; if playback is refused, show a "Tap to listen" button.
 
