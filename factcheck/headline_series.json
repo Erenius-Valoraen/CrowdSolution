@@ -1,0 +1,206 @@
+{
+  "data_end": "2026-06-14",
+  "cities": {
+    "New York": ["new york city", "nyc", "new york"],
+    "Chicago": ["chicago"],
+    "Los Angeles": ["los angeles", "l.a."],
+    "Houston": ["houston"],
+    "Seattle": ["seattle"],
+    "San Francisco": ["san francisco"]
+  },
+  "metrics": [
+    {
+      "id": "unemployment_rate", "label": "Unemployment rate",
+      "aliases": ["unemployment rate", "unemployment", "jobless rate", "out of work"],
+      "source": "pit", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "LNS14000000.M_SA",
+      "state_variable": "LAUSUR.M_SA",
+      "scale": "fraction", "kind": "rate", "frequency": "monthly",
+      "measures": ["level"], "default_measure": "level", "agency": "Bureau of Labor Statistics"
+    },
+    {
+      "id": "labor_force_participation", "label": "Labor force participation rate",
+      "aliases": ["labor force participation rate", "labor force participation", "labour force participation", "participation rate"],
+      "source": "pit", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "LNS11300000.M_SA",
+      "scale": "fraction", "kind": "rate", "frequency": "monthly",
+      "measures": ["level"], "default_measure": "level", "agency": "Bureau of Labor Statistics"
+    },
+    {
+      "id": "nonfarm_jobs", "label": "Total nonfarm jobs",
+      "aliases": ["jobs", "job growth", "payrolls", "nonfarm payrolls", "jobs report", "employment"],
+      "source": "pit", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "CES0000000001.M_SA",
+      "scale": "raw", "kind": "count", "frequency": "monthly", "unit_label": "jobs",
+      "measures": ["change", "level", "yoy_pct"], "default_measure": "change", "agency": "Bureau of Labor Statistics"
+    },
+    {
+      "id": "cpi_inflation", "label": "Inflation (CPI, all items)",
+      "aliases": ["inflation", "inflation rate", "consumer prices", "consumer price index", "cpi"],
+      "source": "pit", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "CUSRSA0SA01982-84.M",
+      "scale": "raw", "kind": "index", "frequency": "monthly",
+      "measures": ["yoy_pct"], "default_measure": "yoy_pct", "agency": "Bureau of Labor Statistics"
+    },
+    {
+      "id": "core_inflation", "label": "Core inflation (CPI less food and energy)",
+      "aliases": ["core inflation", "core cpi", "core prices"],
+      "source": "pit", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "CUSRSA0L1EL1E1982-84.M",
+      "scale": "raw", "kind": "index", "frequency": "monthly",
+      "measures": ["yoy_pct"], "default_measure": "yoy_pct", "agency": "Bureau of Labor Statistics"
+    },
+    {
+      "id": "pce_inflation", "label": "PCE inflation (year over year)",
+      "aliases": ["pce inflation", "pce price index", "pce", "personal consumption expenditures"],
+      "source": "vintage", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "BEA_NIPA_PCE_RELEASE_YOY_DPCERG_M_SA",
+      "scale": "percent", "kind": "rate", "frequency": "monthly", "unit_label": "year over year",
+      "measures": ["level"], "default_measure": "level", "agency": "Bureau of Economic Analysis"
+    },
+    {
+      "id": "core_pce_inflation", "label": "Core PCE inflation (year over year)",
+      "aliases": ["core pce", "core pce inflation"],
+      "source": "vintage", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "BEA_NIPA_PCE_RELEASE_YOY_DPCCRG_M_SA",
+      "scale": "percent", "kind": "rate", "frequency": "monthly", "unit_label": "year over year",
+      "measures": ["level"], "default_measure": "level", "agency": "Bureau of Economic Analysis"
+    },
+    {
+      "id": "average_hourly_earnings", "label": "Average hourly earnings (private sector)",
+      "aliases": ["average hourly earnings", "hourly earnings", "hourly wages", "wages", "wage growth", "paychecks"],
+      "source": "pit", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "CES0500000003.M_SA",
+      "scale": "raw", "kind": "usd", "frequency": "monthly", "unit_label": "per hour",
+      "measures": ["level", "yoy_pct"], "default_measure": "level", "agency": "Bureau of Labor Statistics"
+    },
+    {
+      "id": "job_openings", "label": "Job openings",
+      "aliases": ["job openings", "open jobs", "job vacancies", "unfilled jobs"],
+      "source": "pit", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "JOLTSJO0000000LVL.M_SA",
+      "scale": "raw", "kind": "count", "frequency": "monthly", "unit_label": "openings",
+      "measures": ["level", "change"], "default_measure": "level", "agency": "Bureau of Labor Statistics"
+    },
+    {
+      "id": "fed_funds_rate", "label": "Federal funds rate (monthly average)",
+      "aliases": ["federal funds rate", "fed funds rate", "fed rate", "interest rates", "interest rate"],
+      "source": "pit", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "H15_RIFSPFF_N.M",
+      "scale": "fraction", "kind": "rate", "frequency": "monthly",
+      "measures": ["level"], "default_measure": "level", "agency": "Federal Reserve"
+    },
+    {
+      "id": "mortgage_rate_30yr", "label": "30-year fixed mortgage rate",
+      "aliases": ["mortgage rates", "mortgage rate", "30-year mortgage", "30 year mortgage", "30-year fixed"],
+      "source": "pit", "table": "FREDDIE_MAC_HOUSING", "variable": "FRM_30_YR",
+      "scale": "fraction", "kind": "rate", "frequency": "weekly",
+      "measures": ["level"], "default_measure": "level", "agency": "Freddie Mac"
+    },
+    {
+      "id": "initial_jobless_claims", "label": "Initial jobless claims (weekly)",
+      "aliases": ["jobless claims", "unemployment claims", "initial claims", "unemployment benefits", "claims for unemployment"],
+      "source": "vintage", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "IC_SA",
+      "scale": "raw", "kind": "count", "frequency": "weekly", "unit_label": "claims",
+      "measures": ["level"], "default_measure": "level", "agency": "US Department of Labor"
+    },
+    {
+      "id": "national_debt", "label": "Total public debt outstanding",
+      "aliases": ["national debt", "federal debt", "public debt", "the debt"],
+      "source": "pit", "table": "US_TREASURY", "variable": "Total_Public_Debt_Outstanding",
+      "scale": "raw", "kind": "usd", "frequency": "daily",
+      "measures": ["level", "yoy_pct"], "default_measure": "level", "agency": "US Treasury"
+    },
+    {
+      "id": "gdp_growth", "label": "Real GDP growth (quarterly, annualized)",
+      "aliases": ["gdp growth", "economic growth", "gdp", "economy grew", "the economy grew", "growth rate"],
+      "source": "pit", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "BEA_NIPA_1.1.1_A191RL_Q",
+      "scale": "percent", "kind": "rate", "frequency": "quarterly", "unit_label": "annualized",
+      "measures": ["level"], "default_measure": "level", "agency": "Bureau of Economic Analysis"
+    },
+    {
+      "id": "retail_sales", "label": "Retail sales (monthly)",
+      "aliases": ["retail sales"],
+      "source": "pit", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "ADV_44X72SM_SA",
+      "scale": "raw", "kind": "usd", "frequency": "monthly",
+      "measures": ["yoy_pct", "level"], "default_measure": "yoy_pct", "agency": "US Census Bureau"
+    },
+    {
+      "id": "housing_starts", "label": "Housing starts (annual rate)",
+      "aliases": ["housing starts", "new home construction", "homes being built"],
+      "source": "pit", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "ASTARTSTOTAL_SA",
+      "scale": "raw", "kind": "count", "frequency": "monthly", "unit_label": "homes per year",
+      "measures": ["level", "yoy_pct"], "default_measure": "level", "agency": "US Census Bureau"
+    },
+    {
+      "id": "consumer_sentiment", "label": "Consumer sentiment index",
+      "aliases": ["consumer sentiment", "consumer confidence"],
+      "source": "pit", "table": "FINANCIAL_ECONOMIC_INDICATORS", "variable": "the_index_of_consumer_sentiment",
+      "scale": "raw", "kind": "score", "frequency": "monthly",
+      "measures": ["level"], "default_measure": "level", "agency": "University of Michigan"
+    },
+    {
+      "id": "us_homicides", "label": "Homicides (FBI, annual)", "crime": true,
+      "aliases": ["homicides", "homicide", "murders", "murder"],
+      "source": "pit", "table": "FBI_CRIME", "variable": "annual_count_of_incidents_homicide",
+      "state_variable": "annual_count_of_incidents_homicide",
+      "scale": "raw", "kind": "count", "frequency": "annual", "unit_label": "homicides",
+      "measures": ["annual_total", "yoy_pct"], "default_measure": "annual_total", "agency": "FBI"
+    },
+    {
+      "id": "us_violent_crime", "label": "Violent crime (FBI, annual)", "crime": true,
+      "aliases": ["violent crime", "violent crimes"],
+      "source": "pit", "table": "FBI_CRIME", "variable": "annual_count_of_incidents_violent_crime",
+      "state_variable": "annual_count_of_incidents_violent_crime",
+      "scale": "raw", "kind": "count", "frequency": "annual", "unit_label": "incidents",
+      "measures": ["annual_total", "yoy_pct"], "default_measure": "annual_total", "agency": "FBI"
+    },
+    {
+      "id": "us_property_crime", "label": "Property crime (FBI, annual)", "crime": true,
+      "aliases": ["property crime", "property crimes"],
+      "source": "pit", "table": "FBI_CRIME", "variable": "annual_count_of_incidents_property_crime",
+      "state_variable": "annual_count_of_incidents_property_crime",
+      "scale": "raw", "kind": "count", "frequency": "annual", "unit_label": "incidents",
+      "measures": ["annual_total", "yoy_pct"], "default_measure": "annual_total", "agency": "FBI"
+    },
+    {
+      "id": "city_homicides", "label": "City homicides (police incident data)", "crime": true,
+      "aliases": ["homicides", "homicide", "murders", "murder"],
+      "source": "city_crime", "table": "URBAN_CRIME", "variable": "Daily_count_of_incidents__homicide",
+      "scale": "raw", "kind": "count", "frequency": "annual", "unit_label": "homicides",
+      "measures": ["annual_total", "yoy_pct"], "default_measure": "annual_total", "agency": "City police departments"
+    },
+    {
+      "id": "city_all_crime", "label": "City crime, all reported incidents", "crime": true,
+      "aliases": ["crime", "crimes", "crime rate", "reported incidents"],
+      "source": "city_crime", "table": "URBAN_CRIME", "variable": "Daily_count_of_incidents__all_incidents",
+      "scale": "raw", "kind": "count", "frequency": "annual", "unit_label": "incidents",
+      "measures": ["annual_total", "yoy_pct"], "default_measure": "annual_total", "agency": "City police departments"
+    },
+    {
+      "id": "city_robbery", "label": "City robberies", "crime": true,
+      "aliases": ["robberies", "robbery"],
+      "source": "city_crime", "table": "URBAN_CRIME", "variable": "Daily_count_of_incidents__robbery",
+      "scale": "raw", "kind": "count", "frequency": "annual", "unit_label": "robberies",
+      "measures": ["annual_total", "yoy_pct"], "default_measure": "annual_total", "agency": "City police departments"
+    },
+    {
+      "id": "city_burglary", "label": "City burglaries", "crime": true,
+      "aliases": ["burglaries", "burglary"],
+      "source": "city_crime", "table": "URBAN_CRIME", "variable": "Daily_count_of_incidents__burglary",
+      "scale": "raw", "kind": "count", "frequency": "annual", "unit_label": "burglaries",
+      "measures": ["annual_total", "yoy_pct"], "default_measure": "annual_total", "agency": "City police departments"
+    },
+    {
+      "id": "city_car_theft", "label": "City motor vehicle thefts", "crime": true,
+      "aliases": ["car thefts", "car theft", "motor vehicle thefts", "motor vehicle theft", "vehicle thefts", "auto thefts"],
+      "source": "city_crime", "table": "URBAN_CRIME", "variable": "Daily_count_of_incidents__motor_vehicle_theft",
+      "scale": "raw", "kind": "count", "frequency": "annual", "unit_label": "thefts",
+      "measures": ["annual_total", "yoy_pct"], "default_measure": "annual_total", "agency": "City police departments"
+    },
+    {
+      "id": "city_assault", "label": "City assaults and batteries", "crime": true,
+      "aliases": ["assaults", "assault", "battery"],
+      "source": "city_crime", "table": "URBAN_CRIME", "variable": "Daily_count_of_incidents__battery_or_assault",
+      "scale": "raw", "kind": "count", "frequency": "annual", "unit_label": "incidents",
+      "measures": ["annual_total", "yoy_pct"], "default_measure": "annual_total", "agency": "City police departments"
+    },
+    {
+      "id": "city_theft", "label": "City thefts", "crime": true,
+      "aliases": ["thefts", "theft"],
+      "source": "city_crime", "table": "URBAN_CRIME", "variable": "Daily_count_of_incidents__theft",
+      "scale": "raw", "kind": "count", "frequency": "annual", "unit_label": "thefts",
+      "measures": ["annual_total", "yoy_pct"], "default_measure": "annual_total", "agency": "City police departments"
+    }
+  ]
+}
