@@ -75,6 +75,7 @@ def health_check() -> dict[str, Any]:
         "snowflake_cortex_configured": llm.cortex_available(),
         "community_memory_configured": community.enabled(),
         "web_search_provider": web.provider(),
+        "youtube_transcripts": "supadata" if config.SUPADATA_API_KEY else "direct",
         "voice_input": llm.groq_available(),
         "voice_output_model": config.TTS_MODEL if llm.groq_available() else None,
         "default_extract_models": config.EXTRACT_MODELS,
@@ -140,12 +141,15 @@ async def transcribe_audio(request: Request) -> dict[str, str]:
 
 
 @app.post("/api/scans/{scan_id}/spoken-summary", response_model=models.SpokenSummaryResponse)
-def spoken_summary(scan_id: str) -> dict[str, str]:
+def spoken_summary(scan_id: str, req: models.SpokenSummaryRequest | None = None) -> dict[str, str]:
     """
     A 70 to 130 word summary of a check's results, written to be read aloud: verdict, key warnings with numbers,
-    and what to do. Saved with the scan, so asking again returns the same words.
+    and what to do. Saved with the scan, so asking again returns the same words. Send the report as `report`
+    too: on serverless hosts the instance answering may not have the scan saved.
     """
     data = storage.get_scan(scan_id)
+    if not data and req and req.report and req.report.get("id") == scan_id:
+        data = req.report
     if not data:
         raise HTTPException(status_code=404, detail=f"Scan '{scan_id}' not found.")
     if data.get("spoken_summary"):
@@ -207,60 +211,62 @@ def get_sample_examples() -> list[dict[str, str]]:
     """
     Pre-configured examples for 1-click testing in frontend UI.
     """
+    # Each one shows off a different kind of evidence: rent and pay benchmarks, school and major outcomes, official
+    # statistics, bank and company registries, scam patterns, web search, and a video.
     return [
         {
-            "id": "ex_rental_scam",
-            "title": "Rental Listing Scam (Zelle Deposit)",
-            "category": "housing",
-            "text": "Cozy 2BR near campus, $650/month. I am currently abroad, so please send the deposit by Zelle and I'll mail the keys.",
-        },
-        {
-            "id": "ex_job_scam",
-            "title": "Student Ambassador Job Scam (Upfront Fee)",
-            "category": "job",
-            "text": "Congratulations! You've been selected for our Campus Brand Ambassador program ($35/hr remote). A $150 training deposit is required for your starter materials.",
-        },
-        {
-            "id": "ex_fake_check",
-            "title": "Mystery Shopper / Fake Check Scam",
-            "category": "finance",
-            "text": "We will send you a check for $2,500. Deposit it, keep $400 for your commission, and send the remaining $2,100 back via Bitcoin or wire transfer within 24 hours.",
-        },
-        {
-            "id": "ex_legit_sublet",
-            "title": "Legitimate Waterloo Sublet Offer",
-            "category": "housing",
-            "text": "1 bedroom in a 5x5 apartment at 201 Lester St, Waterloo. $1,450/month including high-speed internet. In-person walkthrough available any weekday after 5 PM. Standard Ontario lease provided.",
-        },
-        {
-            "id": "ex_youtube",
-            "title": "YouTube Video (Jobs Report)",
-            "category": "finance",
-            "text": "https://www.youtube.com/watch?v=4sH30KUfPpM",
-        },
-        {
-            "id": "ex_stat_claim",
-            "title": "Economic Statistics Claim",
-            "category": "finance",
-            "text": "The US unemployment rate is currently 4.0% according to official labor data.",
-        },
-        {
-            "id": "ex_college_claims",
-            "title": "Reddit Comment About Colleges",
+            "id": "ex_waterloo_toronto",
+            "title": "UWaterloo vs UofT: rent, co-op pay, and admissions",
             "category": "school",
-            "text": "Honestly UCLA is way better than UT Austin. It's even cheaper for out-of-state students and almost everyone graduates. And forget MIT, they only admit like 4% of people.",
+            "text": "Choosing between UWaterloo and UofT? Rent near UWaterloo is about $1,450/month for a 1-bedroom, while near UofT in Toronto it's $2,600. Waterloo co-op students earn $28 an hour on average, and UofT only accepts 43% of applicants. International tuition for computer science is over $65,000 a year at both.",
+        },
+        {
+            "id": "ex_amazon_job",
+            "title": "Remote “Amazon” job that wants a $120 laptop fee",
+            "category": "job",
+            "text": "Hi! Your resume stood out for our Remote Data Entry Assistant role with Amazon. Pay is $42/hour for 15 hours a week, no experience needed. Reply to recruiting.amazon.hr@gmail.com and send $120 by Zelle for your starter laptop kit, refunded with your first paycheck.",
+        },
+        {
+            "id": "ex_jobs_report",
+            "title": "May 2026 jobs report: payrolls, unemployment, wages",
+            "category": "job",
+            "text": "The US economy added 172,000 jobs in May 2026, unemployment held at 4.3%, and average hourly earnings grew 3.4% from a year earlier.",
         },
         {
             "id": "ex_majors",
-            "title": "TikTok About Majors and Salaries",
+            "title": "TikTok: which majors really earn six figures",
             "category": "school",
-            "text": "If you do CS at UT Austin you'll make six figures right out of school. Computer science majors make about $90,000 four years after graduating, while psychology majors barely make $40k.",
+            "text": "If you do CS at UT Austin you'll make six figures right out of school. Computer science majors make about $90,000 four years after graduating, nursing grads at Ohio State make $75k, while psychology majors barely make $40k.",
         },
         {
-            "id": "ex_bank_phishing",
-            "title": "Text From 'Your Bank'",
+            "id": "ex_colleges",
+            "title": "Reddit: UCLA vs UT Austin vs MIT",
+            "category": "school",
+            "text": "Honestly UCLA is way better than UT Austin. It's even cheaper for out-of-state students, almost everyone graduates, and grads earn way more. And forget MIT, they only admit like 4% of people and you'll leave with huge debt.",
+        },
+        {
+            "id": "ex_youtube",
+            "title": "YouTube: 16-minute jobs report breakdown",
+            "category": "video",
+            "text": "https://www.youtube.com/watch?v=4sH30KUfPpM",
+        },
+        {
+            "id": "ex_rental_scam",
+            "title": "$650 2BR near UT Austin, deposit by Zelle",
+            "category": "housing",
+            "text": "Cozy 2BR near UT Austin, only $650/month utilities included. I'm working abroad so I can't show it, but send the $500 deposit by Zelle today and I'll mail you the keys.",
+        },
+        {
+            "id": "ex_bank_text",
+            "title": "Text from “Chase”: 12% APY, verify your login",
             "category": "finance",
             "text": "Chase Bank Student Offer: open a Chase High-Yield Student Savings account today and earn 12% APY, guaranteed. Limited spots! Verify your identity at chase-student-rewards.com with your online banking login.",
+        },
+        {
+            "id": "ex_columbus_sublet",
+            "title": "A normal-looking sublet near Ohio State",
+            "category": "housing",
+            "text": "Summer sublet in Columbus near Ohio State: a 1-bedroom apartment for $1,095/month, May to August. Tours any weekday after 5 PM, and the lease transfer is signed through the building's leasing office.",
         },
     ]
 

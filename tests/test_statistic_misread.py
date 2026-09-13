@@ -39,6 +39,11 @@ class MisreadTest(unittest.TestCase):
     def test_accurate_claims_are_never_skipped(self):
         self.assertEqual(run("wages rose 0.3% for the month", 0.3, 0.3, verdict=sv.ACCURATE).status, "ok")
 
+    def test_claims_about_other_countries_go_to_the_web(self):
+        self.assertIsNone(run("Canada's unemployment rate hit 7.1%", 7.1, 4.3))
+        self.assertIsNone(run("groceries in Canada went up 11% last year", 11, 2.9))
+        self.assertEqual(run("US wages up 4.5% from a year ago", 4.5, 3.45).status, "caution")
+
     def test_helper(self):
         self.assertFalse(statistic.looks_misread(172000, 172000, "change", "172,000 jobs added last month"))
         self.assertTrue(statistic.looks_misread(172000, 159_001_000, "level", "172,000 jobs"))

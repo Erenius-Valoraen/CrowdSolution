@@ -55,7 +55,7 @@ The API runs on FastAPI with CORS enabled for all origins (`*`), making it effor
 | `POST` | `/api/verify` | **Primary verification endpoint.** Receives text, returns overall risk, counts, action checklist, and grouped findings. |
 | `GET` | `/api/scans/{scan_id}` | **Permalink lookup.** Fetches a previously verified scan by ID (ideal for `app.com/r/{id}`). |
 | `GET` | `/api/history` | **Dashboard feed.** Returns recent scans with status badges, context, and timestamps. |
-| `GET` | `/api/examples` | **1-Click demo payloads.** Returns 5 realistic student cases (rental scam, job scam, fake check, legit sublet, stats). |
+| `GET` | `/api/examples` | **1-Click demo payloads.** Nine student cases: UWaterloo vs UofT, a fake Amazon job, the May 2026 jobs report, majors and salaries, UCLA vs UT Austin vs MIT, a YouTube video, a rental scam, a fake Chase text, and a normal sublet. |
 | `GET` | `/api/health` | **Health check.** Confirms server status and Groq LLM availability. |
 
 ---

@@ -23,6 +23,12 @@ MONTHLY = re.compile(r"\b(for the month|month[- ]over[- ]month|m/m|monthly|from 
 MISREAD_RATIO = 8  # official figures this far from the claim usually mean a different measure was read, not a wrong claim
 
 
+# Our statistics are US series. A claim about Canada can't be settled with them, so the web check handles it.
+NON_US = re.compile(r"\b(canada|canadian|canadians|ontario|quebec|british columbia|alberta|manitoba|saskatchewan|nova scotia|"
+                    r"toronto|vancouver|montreal|ottawa|calgary|edmonton|waterloo|statistics canada|statcan|bank of canada|"
+                    r"cad|u\.?k\.?|britain|british|england|australia|india)\b", re.I)
+
+
 def looks_misread(claimed: float, official: float | None, measure: str | None, text: str) -> bool:
     """True when the claim was probably matched to the wrong measure, e.g. a monthly 0.3% raise checked against
     the yearly change, or a monthly job gain checked against total jobs. The web check handles those instead."""
@@ -44,6 +50,8 @@ def check(item: Item, ext: Extraction) -> Finding | None:
         return None
     if SUBGROUP.search(item.text or ""):
         return None  # a figure for one group isn't the national statistic; let the web check it
+    if NON_US.search(item.text or "") or ext.location.is_canada:
+        return None  # US series can't settle a claim about another country; let the web check it
     from ..extract import stats_catalog  # local import avoids a cycle at module load
     catalog = stats_catalog()
     d = item.data

@@ -5,11 +5,15 @@ Enforces append-only storage for scan audits.
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 from pathlib import Path
 from typing import Any
 
-DB_PATH = Path(__file__).resolve().parent / "history.db"
+# On Vercel only /tmp is writable, and it isn't shared between server instances or kept between deploys, so history
+# there is best effort. Set TRUSTIFY_DB_PATH to put the file somewhere else.
+DB_PATH = Path(os.environ.get("TRUSTIFY_DB_PATH")
+               or ("/tmp/trustify-history.db" if os.environ.get("VERCEL") else Path(__file__).resolve().parent / "history.db"))
 
 
 def get_connection() -> sqlite3.Connection:

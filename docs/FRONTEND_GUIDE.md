@@ -74,7 +74,7 @@ Backend prerequisites, already set up on Abhi's machine:
 | `POST` | `/api/speak` | Text to speech: `{"text"}` in, WAV audio out, or `503` to use the browser's voice |
 | `GET` | `/api/scans/{id}` | Fetch a saved result, for share links like `/r/{id}` |
 | `GET` | `/api/history?limit=20&offset=0` | Recent checks, newest first |
-| `GET` | `/api/examples` | Five demo texts for one-click buttons |
+| `GET` | `/api/examples` | Demo texts for one-click buttons: `{id, title, category, text}`, where `category` is `housing`, `job`, `school`, `finance`, or `video` |
 | `GET` | `/api/health` | Status and which AI providers are configured |
 
 ### `POST /api/verify`

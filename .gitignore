@@ -17,3 +17,5 @@ config.toml
 secrets*
 *.db
 *.sqlite
+.vercel
+.env*

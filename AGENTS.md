@@ -9,6 +9,7 @@ Trustify (this repo is named CrowdSolution) is a PivotHacks 2026 project: an "is
 - **Design direction is minimalist editorial:** warm off-white and charcoal, Newsreader serif headings, Geist body, Geist Mono for labels and numbers, washed-out red/yellow/green/blue only for status. Colors come from the tokens at the top of `frontend/styles.css` (with a matching dark mode). Use `icon()` for icons, never emoji or symbol characters. Project skills in `.claude/skills/` (`minimalist-ui`, `redesign-existing-projects`) describe the rules.
 - **Working on the checking engine:** read [legit/README.md](legit/README.md).
 - **Querying the data directly:** read [docs/DATA_ACCESS.md](docs/DATA_ACCESS.md).
+- **Deploying:** read [docs/DEPLOY.md](docs/DEPLOY.md). The app runs on Vercel from `pyproject.toml` and `vercel.json`; keys go in Vercel environment variables, never in files.
 
 ## Run
 

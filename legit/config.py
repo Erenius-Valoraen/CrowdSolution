@@ -19,7 +19,18 @@ def load_dotenv(path: Path = REPO_ROOT / ".env") -> None:
 
 load_dotenv()
 
+ON_VERCEL = bool(os.environ.get("VERCEL"))
+
+# Snowflake. Locally this is a named connection in ~/.snowflake/connections.toml. On a server (Vercel), set
+# SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, and SNOWFLAKE_TOKEN (a programmatic access token) instead.
 SNOWFLAKE_CONNECTION = os.environ.get("CROWDSOLUTION_SF_CONNECTION", "crowdsolution")
+SNOWFLAKE_ACCOUNT = os.environ.get("SNOWFLAKE_ACCOUNT")
+SNOWFLAKE_USER = os.environ.get("SNOWFLAKE_USER")
+SNOWFLAKE_TOKEN = os.environ.get("SNOWFLAKE_TOKEN")
+SNOWFLAKE_ROLE = os.environ.get("SNOWFLAKE_ROLE", "SYSADMIN")
+SNOWFLAKE_WAREHOUSE = os.environ.get("SNOWFLAKE_WAREHOUSE", "COMPUTE_WH")
+SNOWFLAKE_DATABASE = os.environ.get("SNOWFLAKE_DATABASE", "SNOWFLAKE_PUBLIC_DATA_FREE")
+SNOWFLAKE_SCHEMA = os.environ.get("SNOWFLAKE_SCHEMA", "PUBLIC_DATA_FREE")
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 SEARCH_MODEL = os.environ.get("GROQ_SEARCH_MODEL", "openai/gpt-oss-120b")
 
@@ -53,6 +64,9 @@ COMMUNITY_MEMORY = os.environ.get("COMMUNITY_MEMORY", "on").strip().lower() not 
 READ_MODELS = EXTRACT_MODELS
 # Optional search APIs. Without one, web checks use DuckDuckGo's HTML page, which blocks heavy automated use.
 TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY") or os.environ.get("TAVILY_API")
+# YouTube transcripts through Supadata (free tier: 100 a month). YouTube blocks transcript requests from cloud servers,
+# so deployments need this; locally the app can also read transcripts directly.
+SUPADATA_API_KEY = os.environ.get("SUPADATA_API_KEY") or os.environ.get("SUPADATA_API")
 BRAVE_SEARCH_API_KEY = os.environ.get("BRAVE_SEARCH_API_KEY")
 # Voice typing: Groq Whisper speech-to-text, tried in order when one is rate limited.
 TRANSCRIBE_MODELS = _models("GROQ_TRANSCRIBE_MODELS", "whisper-large-v3-turbo,whisper-large-v3")

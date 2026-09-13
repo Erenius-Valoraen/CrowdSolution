@@ -49,6 +49,22 @@ class ParseTest(unittest.TestCase):
         self.assertEqual(web.search_query(Item(2, "claim", "x", {"claim": "Canada lost 84,000 jobs in February 2026"}), ext),
                          "Canada lost 84,000 jobs in February 2026")
 
+    def test_country_codes_are_spelled_out(self):
+        from legit.models import Location
+        ext = Extraction(said_on=date(2026, 9, 13), location=Location(country="CA"))
+        self.assertEqual(web.place(ext), "Canada")
+        self.assertEqual(web.place(Extraction(said_on=date(2026, 9, 13), location=Location(city="Austin", region="TX", country="US"))),
+                         "Austin, TX, United States")
+
+    def test_price_query_keeps_the_claims_place(self):
+        from legit.models import Location
+        ext = Extraction(said_on=date(2026, 9, 13), location=Location(country="CA"))
+        item = Item(1, "price", "Rent near UWaterloo is about $1,450/month", {"category": "rent", "bedrooms": 1})
+        query = web.search_query(item, ext)
+        self.assertIn("near UWaterloo", query)
+        self.assertIn("Canada", query)
+        self.assertNotIn(" CA ", f" {query} ")
+
 
 class VerifyTest(unittest.TestCase):
     def setUp(self):
@@ -86,6 +102,27 @@ class VerifyTest(unittest.TestCase):
         self.assertEqual(by_id[2].status, "info")  # a figure was found, so it's context, not unconfirmed
         self.assertIsNone(by_id[2].data["found_value"])  # not comparable without a claimed value
         self.assertEqual(notes, [])
+
+    def test_unsettled_claims_get_a_second_search(self):
+        first = reply([{"id": 1, "verdict": "context", "found": "Canada lost jobs in early 2026", "answer": "Related.",
+                        "sources": [1], "next_query": "Statistics Canada Labour Force Survey February 2026 employment change"}])
+        second = reply([{"id": 1, "verdict": "supported", "found": "84,000 jobs lost in February 2026", "claimed_value": 84000,
+                         "found_value": 84000, "unit": "jobs", "answer": "Statistics Canada confirms it.", "sources": [1]}])
+        results = web.parse_results(PAGE)
+        with mock.patch.object(web.llm, "chat_any", side_effect=[first, second]), \
+                mock.patch.object(web, "search", side_effect=lambda q, limit=5: list(results)) as search:
+            findings, _notes = web.verify(self.items[:1], self.ext)
+        self.assertEqual([f.status for f in findings], ["ok"])
+        self.assertIn("Labour Force Survey", search.call_args_list[-1].args[0])
+        self.assertEqual(findings[0].data["search_rounds"], 2)
+
+    def test_second_search_keeps_the_better_answer(self):
+        first = reply([{"id": 1, "verdict": "supported", "found": "84,000", "answer": "Confirmed.", "sources": [1],
+                        "next_query": "should not be used"}])
+        with mock.patch.object(web.llm, "chat_any", return_value=first) as chat:
+            findings, _notes = web.verify(self.items[:1], self.ext)
+        self.assertEqual(chat.call_count, 1)  # already settled, so no second round
+        self.assertEqual(findings[0].status, "ok")
 
     def test_blocked_search_uses_browser_search(self):
         with mock.patch.object(web, "search", side_effect=web.SearchBlocked("no")), \

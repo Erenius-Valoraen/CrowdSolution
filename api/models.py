@@ -85,6 +85,11 @@ class TranscribeResponse(BaseModel):
     model: str
 
 
+class SpokenSummaryRequest(BaseModel):
+    """Optional: the report the page is showing, used when this server instance doesn't have the scan saved."""
+    report: dict[str, Any] | None = None
+
+
 class SpokenSummaryResponse(BaseModel):
     """A short summary of a check's results, written to be read aloud."""
     text: str

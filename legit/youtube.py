@@ -13,15 +13,20 @@ import html
 import json
 import re
 import sys
+import time
+import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from datetime import date
 
-from . import db, extract, llm, router
+from . import config, db, extract, llm, router
 from .models import SEVERITY, Extraction, Finding, Report
 from .report import KIND_LABELS, TAGS, _wrap
 
 MAX_SECTION_CHARS = 3000   # keeps each extraction call well under Groq's 8K tokens-per-minute limit
+SUPADATA_URL = "https://api.supadata.ai/v1"
+SUPADATA_MAX_WAIT = 90     # seconds to wait for a long video's transcript job
 WEB_WORTHY_ENTITIES = {"company", "employer", "bank", "lender", "loan_servicer", "credit_card", "investment_adviser",
                        "website", "landlord", "property_manager", "charity"}
 VIDEO_ID = re.compile(r"(?:v=|youtu\.be/|shorts/|embed/|live/)([A-Za-z0-9_-]{11})")
@@ -98,26 +103,118 @@ def timestamp(seconds: float | None) -> str:
     return f"{s // 3600}:{s % 3600 // 60:02d}:{s % 60:02d}" if s >= 3600 else f"{s // 60}:{s % 60:02d}"
 
 
+class TranscriptUnavailable(ValueError):
+    """No transcript could be fetched. The message is safe to show to the user."""
+
+
 def fetch_info(video_id: str) -> VideoInfo:
-    """Title, channel, and upload date from the public watch page. Best effort; fields stay None on failure."""
+    """Title, channel, and upload date. Best effort: fields stay None when nothing works."""
     info = VideoInfo(video_id)
+    _scrape_watch_page(info)
+    if info.upload_date is None and config.SUPADATA_API_KEY:
+        _supadata_info(info)  # the watch page is often blocked for cloud servers
+    return info
+
+
+def _scrape_watch_page(info: VideoInfo) -> None:
     try:
-        req = urllib.request.Request(f"https://www.youtube.com/watch?v={video_id}",
+        req = urllib.request.Request(f"https://www.youtube.com/watch?v={info.video_id}",
                                      headers={"User-Agent": "Mozilla/5.0", "Accept-Language": "en-US,en;q=0.8"})
         page = urllib.request.urlopen(req, timeout=20).read().decode("utf-8", "replace")
     except Exception:  # noqa: BLE001
-        return info
+        return
     if m := (re.search(r'"uploadDate":"(\d{4}-\d{2}-\d{2})', page) or re.search(r'"publishDate":"(\d{4}-\d{2}-\d{2})', page)):
         info.upload_date = date.fromisoformat(m.group(1))
     if m := re.search(r'<meta name="title" content="([^"]*)"', page):
         info.title = html.unescape(m.group(1))
     if m := re.search(r'"ownerChannelName":"([^"]*)"', page):
         info.channel = html.unescape(m.group(1))
-    return info
 
 
-def fetch_transcript(video_id: str) -> tuple[list[Segment], str, bool]:
-    """English transcript, preferring human-made captions over auto-generated ones."""
+def _supadata(path: str, params: dict | None = None, timeout: float = 30) -> tuple[int, dict]:
+    """(HTTP status, JSON body) from the Supadata API. Network failures come back as status 0."""
+    query = f"?{urllib.parse.urlencode(params)}" if params else ""
+    req = urllib.request.Request(f"{SUPADATA_URL}{path}{query}", headers={
+        "x-api-key": config.SUPADATA_API_KEY or "", "Accept": "application/json", "User-Agent": "trustify/0.3"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.status, json.load(resp)
+    except urllib.error.HTTPError as e:
+        try:
+            body = json.loads(e.read().decode("utf-8", "replace"))
+        except ValueError:
+            body = {}
+        return e.code, body if isinstance(body, dict) else {}
+    except (urllib.error.URLError, TimeoutError, ValueError):
+        return 0, {}
+
+
+def _supadata_info(info: VideoInfo) -> None:
+    status, body = _supadata("/youtube/video", {"id": info.video_id})
+    if status != 200:
+        return
+    info.title = info.title or body.get("title") or None
+    info.channel = info.channel or (body.get("channel") or {}).get("name") or None
+    if m := re.match(r"\d{4}-\d{2}-\d{2}", str(body.get("uploadDate") or "")):
+        info.upload_date = date.fromisoformat(m.group(0))
+
+
+def _supadata_message(status: int, body: dict) -> str:
+    code = str(body.get("error") or "")
+    if status in (401, 403):
+        return "The transcript service rejected this server's key."
+    if status in (402, 429) or "limit" in code or "quota" in code:
+        return "The free transcript quota is used up for now. Paste the video's transcript text instead."
+    if code == "transcript-unavailable":
+        return "This video has no captions to check."
+    if status == 404 or code in ("video-not-found", "invalid-request"):
+        return "That video is unavailable. It may be private, deleted, or age-restricted."
+    return "Couldn't get this video's transcript. Paste the transcript text instead."
+
+
+def fetch_transcript_supadata(video_id: str, *, poll_seconds: float = 1.0) -> tuple[list[Segment], str | None, bool | None]:
+    """Transcript through Supadata, from YouTube's own captions. Long videos run as a job we poll."""
+    status, body = _supadata("/transcript", {"url": f"https://www.youtube.com/watch?v={video_id}", "lang": "en",
+                                             "mode": "native"})
+    if status == 202 and body.get("jobId"):
+        job_id = body["jobId"]
+        deadline = time.monotonic() + SUPADATA_MAX_WAIT
+        while True:
+            time.sleep(poll_seconds)
+            status, body = _supadata(f"/transcript/{job_id}")
+            state = body.get("status")
+            if status != 200 or state == "completed":
+                break
+            if state == "failed":
+                raise TranscriptUnavailable(_supadata_message(200, body.get("error") or {}))
+            if time.monotonic() > deadline:
+                raise TranscriptUnavailable("The transcript is taking too long to prepare. Try again in a minute.")
+    if status != 200:
+        raise TranscriptUnavailable(_supadata_message(status, body))
+    content = body.get("content") or []
+    if isinstance(content, str):
+        content = [{"text": content, "offset": 0, "duration": 0}]
+    segments = [Segment(float(c.get("offset") or 0) / 1000, float(c.get("duration") or 0) / 1000,
+                        " ".join(html.unescape(str(c.get("text") or "")).split()))
+                for c in content if isinstance(c, dict) and str(c.get("text") or "").strip()]
+    if not segments:
+        raise TranscriptUnavailable("This video has no captions to check.")
+    return segments, body.get("lang"), None  # Supadata doesn't say whether captions were auto-generated
+
+
+def fetch_transcript(video_id: str) -> tuple[list[Segment], str | None, bool | None]:
+    """English transcript. Uses Supadata when its key is set (needed on cloud servers), otherwise YouTube directly."""
+    if config.SUPADATA_API_KEY:
+        try:
+            return fetch_transcript_supadata(video_id)
+        except TranscriptUnavailable:
+            if config.ON_VERCEL:
+                raise  # YouTube blocks cloud servers, so reading it directly won't help here
+    return fetch_transcript_direct(video_id)
+
+
+def fetch_transcript_direct(video_id: str) -> tuple[list[Segment], str, bool]:
+    """English transcript straight from YouTube, preferring human-made captions over auto-generated ones."""
     from youtube_transcript_api import YouTubeTranscriptApi
 
     transcripts = YouTubeTranscriptApi().list(video_id)

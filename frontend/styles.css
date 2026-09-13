@@ -191,6 +191,7 @@ textarea:focus-visible { outline: none; }
 .chip.small { font-size: 11px; padding: 1px 7px; }
 .chip-button { font: inherit; font-size: 14px; min-height: 36px; padding: 6px 12px; cursor: pointer; transition: border-color 200ms var(--ease), color 200ms var(--ease), transform 120ms var(--ease); }
 .chip-button:hover { border-color: var(--text); color: var(--text); }
+.chip-kind { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); padding-right: 8px; margin-right: 2px; border-right: 1px solid var(--border); }
 .chip-button:active { transform: scale(0.98); }
 .chip.tone-red { background: var(--red-soft); border-color: transparent; color: var(--red-ink); }
 .chip.tone-yellow { background: var(--yellow-soft); border-color: transparent; color: var(--yellow-ink); }

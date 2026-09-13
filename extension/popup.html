@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Trustify</title>
+  <style>
+    :root { color-scheme: light dark; --bg: #FBFBFA; --text: #111111; --muted: #6F6E69; --border: #EAEAEA; --brand: #111111; --brand-ink: #FFFFFF; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #191918; --text: #EDECE8; --muted: #A09F9A; --border: #2F2F2E; --brand: #EDECE8; --brand-ink: #191918; } }
+    body { margin: 0; width: 300px; padding: 16px; font: 14px/1.5 "Segoe UI", system-ui, sans-serif; color: var(--text); background: var(--bg); }
+    header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    header svg { width: 28px; height: 28px; color: var(--brand); }
+    h1 { margin: 0; font: 500 20px/1.1 Georgia, "Times New Roman", serif; letter-spacing: -0.02em; }
+    h1 em { font-weight: 400; }
+    p { margin: 0 0 12px; color: var(--muted); }
+    label { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); cursor: pointer; }
+    input { width: 18px; height: 18px; accent-color: var(--brand); }
+    button { width: 100%; margin-top: 12px; height: 38px; border: 0; border-radius: 6px; font: 500 14px "Segoe UI", system-ui, sans-serif; background: var(--brand); color: var(--brand-ink); cursor: pointer; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    #status { margin: 8px 0 0; font-size: 12px; min-height: 18px; }
+  </style>
+</head>
+<body>
+  <header>
+    <svg viewBox="0 0 32 32" aria-hidden="true"><g transform="rotate(-8 16 16)"><path fill="currentColor" d="M8.5 3.5h15a2 2 0 0 1 2 2V27l-2.9 2.4-2.9-2.4-2.9 2.4-2.9-2.4-2.9 2.4-2.9-2.4V5.5a2 2 0 0 1 2-2z"/><path d="M11 15.5l3.6 3.6 6.9-7.6" fill="none" stroke="var(--bg)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></g></svg>
+    <h1>Trust<em>ify</em></h1>
+  </header>
+  <p>Checks YouTube videos about universities, jobs, housing and rent, and government policy. Results appear under the video, above the comments.</p>
+  <label for="enabled">Check videos automatically <input id="enabled" type="checkbox"></label>
+  <button id="check" type="button" disabled>Check this video now</button>
+  <p id="status" aria-live="polite"></p>
+  <script src="popup.js"></script>
+</body>
+</html>

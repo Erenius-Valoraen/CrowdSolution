@@ -211,7 +211,7 @@ function hero(data, text, speakerEl) {
 function videoBlock(v) {
   const covered = v.duration ? Math.min(100, (100 * (v.checked_until || 0)) / v.duration) : 100;
   const meta = [v.channel, v.upload_date && `published ${formatDate(v.upload_date)}`, v.duration_label,
-    v.auto_captions ? 'auto-generated captions' : 'creator captions'].filter(Boolean).join(' · ');
+    v.auto_captions == null ? null : v.auto_captions ? 'auto-generated captions' : 'creator captions'].filter(Boolean).join(' · ');
   return h('div', { class: 'video' },
     h('a', { class: 'video-thumb', href: v.url, target: '_blank', rel: 'noopener noreferrer', 'aria-label': 'Watch on YouTube' },
       h('img', { src: v.thumbnail, alt: '', loading: 'lazy' }), h('span', { class: 'video-play' }, icon('play'))),
@@ -735,10 +735,11 @@ async function loadExamples() {
   try {
     const res = await fetch('/api/examples');
     const examples = await res.json();
+    const kind = { housing: 'Housing', job: 'Jobs', school: 'Schools', finance: 'Money', video: 'Video' };
     els.examples.replaceChildren(...examples.map((ex) => h('button', {
       type: 'button', class: 'chip chip-button', title: ex.text,
       onclick: () => { els.text.value = ex.text; onInput(); els.text.focus(); },
-    }, ex.title)));
+    }, h('span', { class: 'chip-kind' }, kind[ex.category] || ex.category), ex.title)));
   } catch {
     els.examples.replaceChildren();
   }
@@ -974,7 +975,10 @@ async function speakSummary(data, panel, { auto = false } = {}) {
   setSpeaker('loading', 'Writing a short spoken summary…');
   let text;
   try {
-    const res = await fetch(`/api/scans/${encodeURIComponent(data.id)}/spoken-summary`, { method: 'POST' });
+    // Send the report too: on serverless hosts the server instance that answers may not have this scan saved.
+    const res = await fetch(`/api/scans/${encodeURIComponent(data.id)}/spoken-summary`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ report: data }),
+    });
     const body = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(body.detail ? String(body.detail) : `Something went wrong (${res.status}).`);
     text = body.text;
