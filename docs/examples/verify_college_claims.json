@@ -1,0 +1,728 @@
+{
+  "request": {
+    "text": "Honestly UCLA is way better than UT Austin. It's even cheaper for out-of-state students and almost everyone graduates. And forget MIT, they only admit like 4% of people. Oh and CS at UT Austin pays six figures right out of school. Waterloo co-op grads make 150k right away too."
+  },
+  "response": {
+    "id": "chk_1a6d42b3e9",
+    "created_at": "2026-09-13T17:28:07.758057+00:00",
+    "overall": "BE CAREFUL",
+    "overall_badge": {
+      "label": "BE CAREFUL",
+      "color": "yellow",
+      "message": "Caution advised. Several details do not hold up or require in-person verification."
+    },
+    "counts": {
+      "red_flag": 0,
+      "caution": 1,
+      "ok": 3,
+      "info": 1,
+      "unverified": 0,
+      "total": 5
+    },
+    "summary": "Comparisons of tuition, admission rates, and graduate earnings across several universities.",
+    "context": "school",
+    "location": {
+      "city": null,
+      "region": null,
+      "country": "US",
+      "label": "US"
+    },
+    "action_checklist": [
+      "Verify the institution's official accreditation on the government education registry.",
+      "Compare tuition, graduation rates, and median graduate debt using the College Scorecard.",
+      "Reach out to current students or alumni on LinkedIn to confirm program reputation."
+    ],
+    "findings": [
+      {
+        "id": 1,
+        "kind": "school",
+        "status": "caution",
+        "status_label": "CAUTION",
+        "color": "yellow",
+        "title": "University of California-Los Angeles vs The University of Texas at Austin: out-of-state tuition and fees",
+        "quote": "UCLA is way better than UT Austin. It's even cheaper for out-of-state students",
+        "summary": "Out-of-state tuition and fees: University of California-Los Angeles $44,524 vs The University of Texas at Austin $42,778. The claim that it is lower does not match the official figures.",
+        "checker": "college",
+        "evidence": [
+          {
+            "source": "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)",
+            "detail": "University of California-Los Angeles (Los Angeles, CA; public): admission rate 9%; in-state tuition $13,747; out-of-state tuition $44,524; average net price $14,013; graduation rate 93%; median earnings 10 years after starting $82,511; median debt $14,000",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          },
+          {
+            "source": "OpenAlex research catalog (via Snowflake Public Data)",
+            "detail": "University of California, Los Angeles: 402,368 research works, cited 49,170,616 times, h-index 1605",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          },
+          {
+            "source": "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)",
+            "detail": "The University of Texas at Austin (Austin, TX; public): admission rate 29%; in-state tuition $11,678; out-of-state tuition $42,778; average net price $19,678; graduation rate 88%; median earnings 10 years after starting $75,121; median debt $20,500",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          },
+          {
+            "source": "OpenAlex research catalog (via Snowflake Public Data)",
+            "detail": "The University of Texas at Austin: 346,728 research works, cited 22,545,001 times, h-index 1166",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          }
+        ],
+        "data": {
+          "type": "college",
+          "schools": [
+            {
+              "name": "University of California-Los Angeles",
+              "city": "Los Angeles",
+              "state": "CA",
+              "control": "public",
+              "country": "US",
+              "admission_rate": 0.0873,
+              "tuition_in_state": 13747.0,
+              "tuition_out_of_state": 44524.0,
+              "net_price": 14013.0,
+              "graduation_rate": 0.9266,
+              "earnings_10yr": 82511.0,
+              "median_debt": 14000.0,
+              "undergrads": 33040.0,
+              "research_name": "University of California, Los Angeles",
+              "research_works": 402368,
+              "citations": 49170616,
+              "h_index": 1605
+            },
+            {
+              "name": "The University of Texas at Austin",
+              "city": "Austin",
+              "state": "TX",
+              "control": "public",
+              "country": "US",
+              "admission_rate": 0.2912,
+              "tuition_in_state": 11678.0,
+              "tuition_out_of_state": 42778.0,
+              "net_price": 19678.0,
+              "graduation_rate": 0.8764,
+              "earnings_10yr": 75121.0,
+              "median_debt": 20500.0,
+              "undergrads": 42100.0,
+              "research_name": "The University of Texas at Austin",
+              "research_works": 346728,
+              "citations": 22545001,
+              "h_index": 1166
+            }
+          ],
+          "programs": [],
+          "claim": {
+            "text": "UCLA is way better than UT Austin. It's even cheaper for out-of-state students",
+            "label": "Out-of-state tuition and fees",
+            "unit": "usd",
+            "metric": "tuition_out_of_state",
+            "claimed": "lower than The University of Texas at Austin",
+            "official": "$44,524 vs $42,778",
+            "result": "caution"
+          },
+          "opinion": false
+        }
+      },
+      {
+        "id": 5,
+        "kind": "school",
+        "status": "info",
+        "status_label": "INFO",
+        "color": "blue",
+        "title": "University of Waterloo: research profile",
+        "quote": "Waterloo co-op grads make 150k right away too",
+        "summary": "University of Waterloo: 152,458 research works, cited 9,177,493 times, h-index 749. College Scorecard only covers US schools, so admissions, costs, and earnings claims were checked on the web.",
+        "checker": "college",
+        "evidence": [
+          {
+            "source": "OpenAlex research catalog (via Snowflake Public Data)",
+            "detail": "University of Waterloo: 152,458 research works, cited 9,177,493 times, h-index 749",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          }
+        ],
+        "data": {
+          "type": "college",
+          "schools": [
+            {
+              "name": "University of Waterloo",
+              "country": null,
+              "research_name": "University of Waterloo",
+              "research_works": 152458,
+              "citations": 9177493,
+              "h_index": 749
+            }
+          ],
+          "programs": [],
+          "claim": null,
+          "opinion": false
+        }
+      },
+      {
+        "id": 2,
+        "kind": "school",
+        "status": "ok",
+        "status_label": "OK",
+        "color": "green",
+        "title": "University of California-Los Angeles: graduation rate within 6 years",
+        "quote": "almost everyone graduates",
+        "summary": "Graduation rate within 6 years is 93% according to College Scorecard. The claim said nearly 100%.",
+        "checker": "college",
+        "evidence": [
+          {
+            "source": "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)",
+            "detail": "University of California-Los Angeles (Los Angeles, CA; public): admission rate 9%; in-state tuition $13,747; out-of-state tuition $44,524; average net price $14,013; graduation rate 93%; median earnings 10 years after starting $82,511; median debt $14,000",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          },
+          {
+            "source": "OpenAlex research catalog (via Snowflake Public Data)",
+            "detail": "University of California, Los Angeles: 402,368 research works, cited 49,170,616 times, h-index 1605",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          }
+        ],
+        "data": {
+          "type": "college",
+          "schools": [
+            {
+              "name": "University of California-Los Angeles",
+              "city": "Los Angeles",
+              "state": "CA",
+              "control": "public",
+              "country": "US",
+              "admission_rate": 0.0873,
+              "tuition_in_state": 13747.0,
+              "tuition_out_of_state": 44524.0,
+              "net_price": 14013.0,
+              "graduation_rate": 0.9266,
+              "earnings_10yr": 82511.0,
+              "median_debt": 14000.0,
+              "undergrads": 33040.0,
+              "research_name": "University of California, Los Angeles",
+              "research_works": 402368,
+              "citations": 49170616,
+              "h_index": 1605
+            }
+          ],
+          "programs": [],
+          "claim": {
+            "text": "almost everyone graduates",
+            "label": "Graduation rate within 6 years",
+            "unit": "percent",
+            "metric": "graduation_rate",
+            "claimed": "nearly 100%",
+            "official": "93%",
+            "result": "ok"
+          },
+          "opinion": false
+        }
+      },
+      {
+        "id": 3,
+        "kind": "school",
+        "status": "ok",
+        "status_label": "OK",
+        "color": "green",
+        "title": "Massachusetts Institute of Technology: admission rate",
+        "quote": "MIT, they only admit like 4% of people",
+        "summary": "Admission rate is 5% according to College Scorecard. The claim said 4%.",
+        "checker": "college",
+        "evidence": [
+          {
+            "source": "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)",
+            "detail": "Massachusetts Institute of Technology (Cambridge, MA; private nonprofit): admission rate 5%; in-state tuition $60,156; out-of-state tuition $60,156; average net price $19,813; graduation rate 96%; median earnings 10 years after starting $143,372; median debt $14,768",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          },
+          {
+            "source": "OpenAlex research catalog (via Snowflake Public Data)",
+            "detail": "Massachusetts Institute of Technology: 338,843 research works, cited 61,741,940 times, h-index 2229",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          }
+        ],
+        "data": {
+          "type": "college",
+          "schools": [
+            {
+              "name": "Massachusetts Institute of Technology",
+              "city": "Cambridge",
+              "state": "MA",
+              "control": "private nonprofit",
+              "country": "US",
+              "admission_rate": 0.0474,
+              "tuition_in_state": 60156.0,
+              "tuition_out_of_state": 60156.0,
+              "net_price": 19813.0,
+              "graduation_rate": 0.9608,
+              "earnings_10yr": 143372.0,
+              "median_debt": 14768.0,
+              "undergrads": 4571.0,
+              "research_name": "Massachusetts Institute of Technology",
+              "research_works": 338843,
+              "citations": 61741940,
+              "h_index": 2229
+            }
+          ],
+          "programs": [],
+          "claim": {
+            "text": "MIT, they only admit like 4% of people",
+            "label": "Admission rate",
+            "unit": "percent",
+            "metric": "admission_rate",
+            "claimed": "4%",
+            "official": "5%",
+            "result": "ok"
+          },
+          "opinion": false
+        }
+      },
+      {
+        "id": 4,
+        "kind": "school",
+        "status": "ok",
+        "status_label": "OK",
+        "color": "green",
+        "title": "The University of Texas at Austin: Computer and Information Sciences, General",
+        "quote": "CS at UT Austin pays six figures right out of school",
+        "summary": "Median earnings 1 year after graduating for Computer and Information Sciences, General (Bachelor's Degree) at The University of Texas at Austin is $111,587. The claim said over $100,000.",
+        "checker": "college",
+        "evidence": [
+          {
+            "source": "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)",
+            "detail": "The University of Texas at Austin (Austin, TX; public): admission rate 29%; in-state tuition $11,678; out-of-state tuition $42,778; average net price $19,678; graduation rate 88%; median earnings 10 years after starting $75,121; median debt $20,500",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          },
+          {
+            "source": "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)",
+            "detail": "Computer and Information Sciences, General (Bachelor's Degree) at The University of Texas at Austin, 438 graduates in the cohort: median earnings 1 year after graduating $111,587; median earnings 4 years after graduating $112,017; median earnings 5 years after graduating $132,436; median debt for graduates $20,500",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          },
+          {
+            "source": "OpenAlex research catalog (via Snowflake Public Data)",
+            "detail": "The University of Texas at Austin: 346,728 research works, cited 22,545,001 times, h-index 1166",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          }
+        ],
+        "data": {
+          "type": "college",
+          "schools": [
+            {
+              "name": "The University of Texas at Austin",
+              "city": "Austin",
+              "state": "TX",
+              "control": "public",
+              "country": "US",
+              "admission_rate": 0.2912,
+              "tuition_in_state": 11678.0,
+              "tuition_out_of_state": 42778.0,
+              "net_price": 19678.0,
+              "graduation_rate": 0.8764,
+              "earnings_10yr": 75121.0,
+              "median_debt": 20500.0,
+              "undergrads": 42100.0,
+              "research_name": "The University of Texas at Austin",
+              "research_works": 346728,
+              "citations": 22545001,
+              "h_index": 1166
+            }
+          ],
+          "programs": [
+            {
+              "school": "The University of Texas at Austin",
+              "program": "Computer and Information Sciences, General",
+              "credential": "Bachelor's Degree",
+              "graduates": 438,
+              "earnings_1yr": 111587.0,
+              "earnings_4yr": 112017.0,
+              "earnings_5yr": 132436.0,
+              "median_debt": 20500.0,
+              "schools": null
+            }
+          ],
+          "claim": {
+            "text": "CS at UT Austin pays six figures right out of school",
+            "label": "Median earnings 1 year after graduating, Computer and Information Sciences, General",
+            "unit": "usd",
+            "metric": "program_earnings_1yr",
+            "claimed": "over $100,000",
+            "official": "$111,587",
+            "result": "ok"
+          },
+          "opinion": false
+        }
+      }
+    ],
+    "grouped_findings": {
+      "red_flags": [],
+      "cautions": [
+        {
+          "id": 1,
+          "kind": "school",
+          "status": "caution",
+          "status_label": "CAUTION",
+          "color": "yellow",
+          "title": "University of California-Los Angeles vs The University of Texas at Austin: out-of-state tuition and fees",
+          "quote": "UCLA is way better than UT Austin. It's even cheaper for out-of-state students",
+          "summary": "Out-of-state tuition and fees: University of California-Los Angeles $44,524 vs The University of Texas at Austin $42,778. The claim that it is lower does not match the official figures.",
+          "checker": "college",
+          "evidence": [
+            {
+              "source": "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)",
+              "detail": "University of California-Los Angeles (Los Angeles, CA; public): admission rate 9%; in-state tuition $13,747; out-of-state tuition $44,524; average net price $14,013; graduation rate 93%; median earnings 10 years after starting $82,511; median debt $14,000",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            },
+            {
+              "source": "OpenAlex research catalog (via Snowflake Public Data)",
+              "detail": "University of California, Los Angeles: 402,368 research works, cited 49,170,616 times, h-index 1605",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            },
+            {
+              "source": "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)",
+              "detail": "The University of Texas at Austin (Austin, TX; public): admission rate 29%; in-state tuition $11,678; out-of-state tuition $42,778; average net price $19,678; graduation rate 88%; median earnings 10 years after starting $75,121; median debt $20,500",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            },
+            {
+              "source": "OpenAlex research catalog (via Snowflake Public Data)",
+              "detail": "The University of Texas at Austin: 346,728 research works, cited 22,545,001 times, h-index 1166",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            }
+          ],
+          "data": {
+            "type": "college",
+            "schools": [
+              {
+                "name": "University of California-Los Angeles",
+                "city": "Los Angeles",
+                "state": "CA",
+                "control": "public",
+                "country": "US",
+                "admission_rate": 0.0873,
+                "tuition_in_state": 13747.0,
+                "tuition_out_of_state": 44524.0,
+                "net_price": 14013.0,
+                "graduation_rate": 0.9266,
+                "earnings_10yr": 82511.0,
+                "median_debt": 14000.0,
+                "undergrads": 33040.0,
+                "research_name": "University of California, Los Angeles",
+                "research_works": 402368,
+                "citations": 49170616,
+                "h_index": 1605
+              },
+              {
+                "name": "The University of Texas at Austin",
+                "city": "Austin",
+                "state": "TX",
+                "control": "public",
+                "country": "US",
+                "admission_rate": 0.2912,
+                "tuition_in_state": 11678.0,
+                "tuition_out_of_state": 42778.0,
+                "net_price": 19678.0,
+                "graduation_rate": 0.8764,
+                "earnings_10yr": 75121.0,
+                "median_debt": 20500.0,
+                "undergrads": 42100.0,
+                "research_name": "The University of Texas at Austin",
+                "research_works": 346728,
+                "citations": 22545001,
+                "h_index": 1166
+              }
+            ],
+            "programs": [],
+            "claim": {
+              "text": "UCLA is way better than UT Austin. It's even cheaper for out-of-state students",
+              "label": "Out-of-state tuition and fees",
+              "unit": "usd",
+              "metric": "tuition_out_of_state",
+              "claimed": "lower than The University of Texas at Austin",
+              "official": "$44,524 vs $42,778",
+              "result": "caution"
+            },
+            "opinion": false
+          }
+        }
+      ],
+      "ok": [
+        {
+          "id": 2,
+          "kind": "school",
+          "status": "ok",
+          "status_label": "OK",
+          "color": "green",
+          "title": "University of California-Los Angeles: graduation rate within 6 years",
+          "quote": "almost everyone graduates",
+          "summary": "Graduation rate within 6 years is 93% according to College Scorecard. The claim said nearly 100%.",
+          "checker": "college",
+          "evidence": [
+            {
+              "source": "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)",
+              "detail": "University of California-Los Angeles (Los Angeles, CA; public): admission rate 9%; in-state tuition $13,747; out-of-state tuition $44,524; average net price $14,013; graduation rate 93%; median earnings 10 years after starting $82,511; median debt $14,000",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            },
+            {
+              "source": "OpenAlex research catalog (via Snowflake Public Data)",
+              "detail": "University of California, Los Angeles: 402,368 research works, cited 49,170,616 times, h-index 1605",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            }
+          ],
+          "data": {
+            "type": "college",
+            "schools": [
+              {
+                "name": "University of California-Los Angeles",
+                "city": "Los Angeles",
+                "state": "CA",
+                "control": "public",
+                "country": "US",
+                "admission_rate": 0.0873,
+                "tuition_in_state": 13747.0,
+                "tuition_out_of_state": 44524.0,
+                "net_price": 14013.0,
+                "graduation_rate": 0.9266,
+                "earnings_10yr": 82511.0,
+                "median_debt": 14000.0,
+                "undergrads": 33040.0,
+                "research_name": "University of California, Los Angeles",
+                "research_works": 402368,
+                "citations": 49170616,
+                "h_index": 1605
+              }
+            ],
+            "programs": [],
+            "claim": {
+              "text": "almost everyone graduates",
+              "label": "Graduation rate within 6 years",
+              "unit": "percent",
+              "metric": "graduation_rate",
+              "claimed": "nearly 100%",
+              "official": "93%",
+              "result": "ok"
+            },
+            "opinion": false
+          }
+        },
+        {
+          "id": 3,
+          "kind": "school",
+          "status": "ok",
+          "status_label": "OK",
+          "color": "green",
+          "title": "Massachusetts Institute of Technology: admission rate",
+          "quote": "MIT, they only admit like 4% of people",
+          "summary": "Admission rate is 5% according to College Scorecard. The claim said 4%.",
+          "checker": "college",
+          "evidence": [
+            {
+              "source": "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)",
+              "detail": "Massachusetts Institute of Technology (Cambridge, MA; private nonprofit): admission rate 5%; in-state tuition $60,156; out-of-state tuition $60,156; average net price $19,813; graduation rate 96%; median earnings 10 years after starting $143,372; median debt $14,768",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            },
+            {
+              "source": "OpenAlex research catalog (via Snowflake Public Data)",
+              "detail": "Massachusetts Institute of Technology: 338,843 research works, cited 61,741,940 times, h-index 2229",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            }
+          ],
+          "data": {
+            "type": "college",
+            "schools": [
+              {
+                "name": "Massachusetts Institute of Technology",
+                "city": "Cambridge",
+                "state": "MA",
+                "control": "private nonprofit",
+                "country": "US",
+                "admission_rate": 0.0474,
+                "tuition_in_state": 60156.0,
+                "tuition_out_of_state": 60156.0,
+                "net_price": 19813.0,
+                "graduation_rate": 0.9608,
+                "earnings_10yr": 143372.0,
+                "median_debt": 14768.0,
+                "undergrads": 4571.0,
+                "research_name": "Massachusetts Institute of Technology",
+                "research_works": 338843,
+                "citations": 61741940,
+                "h_index": 2229
+              }
+            ],
+            "programs": [],
+            "claim": {
+              "text": "MIT, they only admit like 4% of people",
+              "label": "Admission rate",
+              "unit": "percent",
+              "metric": "admission_rate",
+              "claimed": "4%",
+              "official": "5%",
+              "result": "ok"
+            },
+            "opinion": false
+          }
+        },
+        {
+          "id": 4,
+          "kind": "school",
+          "status": "ok",
+          "status_label": "OK",
+          "color": "green",
+          "title": "The University of Texas at Austin: Computer and Information Sciences, General",
+          "quote": "CS at UT Austin pays six figures right out of school",
+          "summary": "Median earnings 1 year after graduating for Computer and Information Sciences, General (Bachelor's Degree) at The University of Texas at Austin is $111,587. The claim said over $100,000.",
+          "checker": "college",
+          "evidence": [
+            {
+              "source": "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)",
+              "detail": "The University of Texas at Austin (Austin, TX; public): admission rate 29%; in-state tuition $11,678; out-of-state tuition $42,778; average net price $19,678; graduation rate 88%; median earnings 10 years after starting $75,121; median debt $20,500",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            },
+            {
+              "source": "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)",
+              "detail": "Computer and Information Sciences, General (Bachelor's Degree) at The University of Texas at Austin, 438 graduates in the cohort: median earnings 1 year after graduating $111,587; median earnings 4 years after graduating $112,017; median earnings 5 years after graduating $132,436; median debt for graduates $20,500",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            },
+            {
+              "source": "OpenAlex research catalog (via Snowflake Public Data)",
+              "detail": "The University of Texas at Austin: 346,728 research works, cited 22,545,001 times, h-index 1166",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            }
+          ],
+          "data": {
+            "type": "college",
+            "schools": [
+              {
+                "name": "The University of Texas at Austin",
+                "city": "Austin",
+                "state": "TX",
+                "control": "public",
+                "country": "US",
+                "admission_rate": 0.2912,
+                "tuition_in_state": 11678.0,
+                "tuition_out_of_state": 42778.0,
+                "net_price": 19678.0,
+                "graduation_rate": 0.8764,
+                "earnings_10yr": 75121.0,
+                "median_debt": 20500.0,
+                "undergrads": 42100.0,
+                "research_name": "The University of Texas at Austin",
+                "research_works": 346728,
+                "citations": 22545001,
+                "h_index": 1166
+              }
+            ],
+            "programs": [
+              {
+                "school": "The University of Texas at Austin",
+                "program": "Computer and Information Sciences, General",
+                "credential": "Bachelor's Degree",
+                "graduates": 438,
+                "earnings_1yr": 111587.0,
+                "earnings_4yr": 112017.0,
+                "earnings_5yr": 132436.0,
+                "median_debt": 20500.0,
+                "schools": null
+              }
+            ],
+            "claim": {
+              "text": "CS at UT Austin pays six figures right out of school",
+              "label": "Median earnings 1 year after graduating, Computer and Information Sciences, General",
+              "unit": "usd",
+              "metric": "program_earnings_1yr",
+              "claimed": "over $100,000",
+              "official": "$111,587",
+              "result": "ok"
+            },
+            "opinion": false
+          }
+        }
+      ],
+      "context": [
+        {
+          "id": 5,
+          "kind": "school",
+          "status": "info",
+          "status_label": "INFO",
+          "color": "blue",
+          "title": "University of Waterloo: research profile",
+          "quote": "Waterloo co-op grads make 150k right away too",
+          "summary": "University of Waterloo: 152,458 research works, cited 9,177,493 times, h-index 749. College Scorecard only covers US schools, so admissions, costs, and earnings claims were checked on the web.",
+          "checker": "college",
+          "evidence": [
+            {
+              "source": "OpenAlex research catalog (via Snowflake Public Data)",
+              "detail": "University of Waterloo: 152,458 research works, cited 9,177,493 times, h-index 749",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            }
+          ],
+          "data": {
+            "type": "college",
+            "schools": [
+              {
+                "name": "University of Waterloo",
+                "country": null,
+                "research_name": "University of Waterloo",
+                "research_works": 152458,
+                "citations": 9177493,
+                "h_index": 749
+              }
+            ],
+            "programs": [],
+            "claim": null,
+            "opinion": false
+          }
+        }
+      ],
+      "unverified": []
+    },
+    "notes": [
+      "Web search hit Groq's rate limit; a single browser search can use more than a free-tier day of tokens. Try again in about 308 seconds."
+    ],
+    "raw_report": {
+      "parser": "snowflake cortex claude-haiku-4-5",
+      "said_on": "2026-09-13",
+      "items_count": 5
+    }
+  }
+}

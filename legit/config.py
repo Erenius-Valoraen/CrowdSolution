@@ -23,12 +23,25 @@ SNOWFLAKE_CONNECTION = os.environ.get("CROWDSOLUTION_SF_CONNECTION", "crowdsolut
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 SEARCH_MODEL = os.environ.get("GROQ_SEARCH_MODEL", "openai/gpt-oss-120b")
 
+# Snowflake Cortex (REST chat completions). The token is a Snowflake programmatic access token for the account below.
+CORTEX_TOKEN = os.environ.get("CORTEX_PAT") or os.environ.get("PIVOT_AI")
+CORTEX_ACCOUNT = os.environ.get("CORTEX_ACCOUNT")          # account identifier, e.g. MYORG-MYACCOUNT
+CORTEX_PREFIX = "cortex:"
+
 
 def _models(var: str, default: str) -> list[str]:
     return [m.strip() for m in os.environ.get(var, default).split(",") if m.strip()]
 
 
-# Tried in order; the next model is used when one hits its rate limit.
-# Qwen first: fast (about 1 second) and cheap per call. GPT-OSS models are kept as backups.
-EXTRACT_MODELS = _models("GROQ_EXTRACT_MODELS", "qwen/qwen3.8-27b,qwen/qwen3.6-27b,openai/gpt-oss-120b,openai/gpt-oss-20b")
+def cortex_configured() -> bool:
+    return bool(CORTEX_TOKEN and CORTEX_ACCOUNT)
+
+
+GROQ_EXTRACT_MODELS = _models("GROQ_EXTRACT_MODELS", "qwen/qwen3.8-27b,qwen/qwen3.6-27b,openai/gpt-oss-120b,openai/gpt-oss-20b")
+CORTEX_MODELS = _models("CORTEX_MODELS", "claude-haiku-4-5,openai-gpt-5-mini,llama3.3-70b")
+
+# Tried in order; the next model is used when one hits a rate limit or is unavailable.
+# Snowflake Cortex goes first when configured; Groq models are the backup.
+EXTRACT_MODELS = ([CORTEX_PREFIX + m for m in CORTEX_MODELS] if cortex_configured() else []) + GROQ_EXTRACT_MODELS
+# Web search needs Groq's browser_search tool, which Cortex chat completions don't offer.
 SEARCH_MODELS = _models("GROQ_SEARCH_MODELS", f"{SEARCH_MODEL},openai/gpt-oss-20b")

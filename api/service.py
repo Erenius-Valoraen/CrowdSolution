@@ -93,7 +93,7 @@ def generate_checklist(context: str, overall: str, findings: list[Finding]) -> l
     return steps[:5]
 
 
-def verify_text(text: str, seen_on_str: str | None = None, offline: bool = True) -> dict[str, Any]:
+def verify_text(text: str, seen_on_str: str | None = None, offline: bool = False) -> dict[str, Any]:
     """
     Run extraction and verification, returning a frontend-ready JSON dictionary.
     """

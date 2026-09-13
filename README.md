@@ -66,11 +66,10 @@ The API runs on FastAPI with CORS enabled for all origins (`*`), making it effor
 ```json
 {
   "text": "Cozy 2BR near campus, $650/month. I'm abroad, send the deposit by Zelle and I'll mail the keys.",
-  "seen_on": "2026-09-13",
-  "offline": true
+  "seen_on": "2026-09-13"
 }
 ```
-> **Tip:** Setting `"offline": true` completes in ~2–3 seconds using official guidance and pattern rules without consuming web search tokens.
+> **Tip:** Web search is on by default (`"offline": false`), which takes about 10–30 seconds. Send `"offline": true` for a 2–5 second check using only official data and scam patterns. See [docs/FRONTEND_GUIDE.md](docs/FRONTEND_GUIDE.md) for the full contract.
 
 ### Response (Tailored for Frontend UI)
 ```json

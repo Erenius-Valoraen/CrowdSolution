@@ -1,6 +1,7 @@
-"""Groq API client: JSON chat for extraction, and browser search for web checks.
+"""LLM client: Snowflake Cortex or Groq for JSON extraction, and Groq browser search for web checks.
 
-Groq's API is OpenAI-compatible. The key comes from GROQ_API_KEY (environment or the gitignored .env)."""
+Both expose OpenAI-compatible chat completions. Model names starting with "cortex:" go to Snowflake Cortex;
+everything else goes to Groq. Keys come from the environment or the gitignored .env file."""
 from __future__ import annotations
 
 import json
@@ -12,7 +13,9 @@ import urllib.request
 
 from . import config
 
-API_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+API_URL = GROQ_URL  # kept for older imports
+CORTEX_PATH = "/api/v2/cortex/v1/chat/completions"
 
 
 class LLMError(RuntimeError):
@@ -25,8 +28,37 @@ class RateLimited(LLMError):
         self.retry_after = retry_after
 
 
-def available() -> bool:
+def groq_available() -> bool:
     return bool(os.environ.get("GROQ_API_KEY"))
+
+
+def cortex_available() -> bool:
+    return config.cortex_configured()
+
+
+def available() -> bool:
+    """True when any extraction model is usable."""
+    return groq_available() or cortex_available()
+
+
+def is_cortex(model: str) -> bool:
+    return model.startswith(config.CORTEX_PREFIX)
+
+
+def cortex_url(account: str) -> str:
+    """Account identifier or URL -> REST endpoint. Underscores aren't allowed in hostnames, so they become hyphens."""
+    host = account.strip().lower()
+    host = re.sub(r"^https?://", "", host).split("/")[0]
+    host = host.removesuffix(".snowflakecomputing.com").replace("_", "-")
+    return f"https://{host}.snowflakecomputing.com{CORTEX_PATH}"
+
+
+def endpoint(model: str) -> tuple[str, str | None, str]:
+    """(url, bearer token, model name the provider expects)."""
+    if is_cortex(model):
+        url = cortex_url(config.CORTEX_ACCOUNT) if config.CORTEX_ACCOUNT else ""
+        return url, config.CORTEX_TOKEN, model[len(config.CORTEX_PREFIX):]
+    return GROQ_URL, os.environ.get("GROQ_API_KEY"), model
 
 
 def _retry_after(message: str) -> float | None:
@@ -37,28 +69,32 @@ def _retry_after(message: str) -> float | None:
 
 
 def _post(body: dict, timeout: float) -> dict:
-    key = os.environ.get("GROQ_API_KEY")
-    if not key:
-        raise LLMError("GROQ_API_KEY is not set")
-    req = urllib.request.Request(API_URL, data=json.dumps(body).encode("utf-8"), method="POST", headers={
+    url, key, api_model = endpoint(body["model"])
+    provider = "Snowflake Cortex" if is_cortex(body["model"]) else "Groq"
+    if not key or not url:
+        raise LLMError(f"{provider} is not configured")
+    payload = dict(body, model=api_model)
+    req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), method="POST", headers={
         "Authorization": f"Bearer {key}",
         "Content-Type": "application/json",
-        "User-Agent": "crowdsolution-legit/0.2",
+        "Accept": "application/json",
+        "User-Agent": "crowdsolution-legit/0.3",
     })
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.load(resp)
     except urllib.error.HTTPError as e:
-        detail = e.read().decode("utf-8", "replace")
+        detail = e.read().decode("utf-8", "replace").replace(key, "***")
         try:
-            message = json.loads(detail)["error"]["message"]
-        except (ValueError, KeyError, TypeError):
+            parsed = json.loads(detail)
+            message = parsed["error"]["message"] if isinstance(parsed.get("error"), dict) else parsed.get("message", detail)
+        except (ValueError, KeyError, TypeError, AttributeError):
             message = detail[:300]
         if e.code == 429:
-            raise RateLimited(message, _retry_after(message)) from None
-        raise LLMError(f"HTTP {e.code}: {message[:300]}") from None
+            raise RateLimited(f"{provider}: {message}", _retry_after(str(message))) from None
+        raise LLMError(f"HTTP {e.code} from {provider}: {str(message)[:300]}") from None
     except (urllib.error.URLError, TimeoutError) as e:
-        raise LLMError(f"network error: {e}") from None
+        raise LLMError(f"network error reaching {provider}: {e}") from None
 
 
 def chat(messages: list[dict], *, model: str | None = None, json_mode: bool = False, tools: list | None = None,
@@ -68,22 +104,32 @@ def chat(messages: list[dict], *, model: str | None = None, json_mode: bool = Fa
     Retries short rate-limit waits and transient server errors."""
     model = model or config.GROQ_MODEL
     body: dict = {"model": model, "messages": messages}
-    qwen = model.startswith("qwen/")
-    if json_mode:
-        body["temperature"] = 0
-        if not qwen:  # Qwen fails Groq's strict JSON validation; parse_json handles its plain output
-            body["response_format"] = {"type": "json_object"}
-    if tools:
-        body["tools"] = tools
-    if qwen:
-        body["reasoning_effort"] = "none"  # with thinking on, Qwen spends its whole output budget reasoning
-    elif reasoning_effort:
-        body["reasoning_effort"] = reasoning_effort
+    if is_cortex(model):
+        if tools:
+            raise LLMError("tools not supported on Snowflake Cortex chat completions")
+        # OpenAI reasoning models on Cortex only accept the default temperature.
+        if json_mode and not model[len(config.CORTEX_PREFIX):].startswith("openai-"):
+            body["temperature"] = 0  # parse_json pulls the object out of the reply
+    else:
+        qwen = model.startswith("qwen/")
+        if json_mode:
+            body["temperature"] = 0
+            if not qwen:  # Qwen fails Groq's strict JSON validation; parse_json handles its plain output
+                body["response_format"] = {"type": "json_object"}
+        if tools:
+            body["tools"] = tools
+        if qwen:
+            body["reasoning_effort"] = "none"  # with thinking on, Qwen spends its whole output budget reasoning
+        elif reasoning_effort:
+            body["reasoning_effort"] = reasoning_effort
     last: Exception | None = None
     for attempt in range(3):
         try:
             data = _post(body, timeout)
-            return data["choices"][0]["message"]
+            message = data["choices"][0]["message"]
+            if isinstance(message.get("content"), list):  # some providers return content blocks
+                message["content"] = "".join(p.get("text", "") for p in message["content"] if isinstance(p, dict))
+            return message
         except RateLimited as e:
             last = e
             if attempt < 2 and e.retry_after is not None and e.retry_after <= max_wait:
@@ -109,6 +155,11 @@ def chat(messages: list[dict], *, model: str | None = None, json_mode: bool = Fa
     raise LLMError(f"gave up after retries: {last}")
 
 
+SKIPPABLE = ("HTTP 400", "HTTP 401", "HTTP 403", "HTTP 404", "HTTP 413", "decommissioned", "does not exist",
+             "not supported", "not available", "not configured", "Failed to validate JSON", "gave up after retries",
+             "network error")
+
+
 def chat_any(models: list[str], messages: list[dict], **kwargs) -> tuple[dict, str]:
     """Try each model in order, moving on when one is rate limited or unavailable. Returns (message, model)."""
     problems: list[str] = []
@@ -121,8 +172,7 @@ def chat_any(models: list[str], messages: list[dict], **kwargs) -> tuple[dict, s
             last_wait = e.retry_after
         except LLMError as e:
             text = str(e)
-            if any(s in text for s in ("HTTP 404", "HTTP 413", "decommissioned", "does not exist", "not supported",
-                                       "Failed to validate JSON", "gave up after retries")):
+            if any(s in text for s in SKIPPABLE):
                 problems.append(f"{model}: {text[:80]}")
                 continue
             raise

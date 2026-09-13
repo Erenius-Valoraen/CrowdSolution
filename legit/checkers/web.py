@@ -34,7 +34,7 @@ def question(item: Item, ext: Extraction) -> str:
 def verify(items: list[Item], ext: Extraction) -> tuple[list[Finding], list[str]]:
     if not items:
         return [], []
-    if not llm.available():
+    if not llm.groq_available():
         return [], ["Web search skipped: no GROQ_API_KEY set."]
     batch = items[:MAX_ITEMS]
     notes = [f"Web search covered the first {MAX_ITEMS} unresolved items only."] if len(items) > MAX_ITEMS else []

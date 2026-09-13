@@ -12,7 +12,7 @@ class VerifyRequest(BaseModel):
     """Request payload from frontend."""
     text: str = Field(..., description="The listing, job offer, message, or claim text to verify.", min_length=1)
     seen_on: str | None = Field(None, description="Date seen (YYYY-MM-DD), default is today.")
-    offline: bool = Field(True, description="If True, uses official data & patterns (fast, saves Groq rate limits). If False, includes web search.")
+    offline: bool = Field(False, description="Web search is on by default. Set True to use only official data and scam patterns (faster, no web search tokens).")
 
 
 class EvidenceItem(BaseModel):

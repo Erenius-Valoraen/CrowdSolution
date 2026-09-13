@@ -81,7 +81,7 @@ def test_history():
 
 
 def test_empty_text_validation():
-    response = client.post("/api/verify", json={"text": "   "})
+    response = client.post("/api/verify", json={"text": "   ", "offline": True})
     assert response.status_code in (400, 422)
     print("[PASS] Validation for empty text returned expected client error.")
 

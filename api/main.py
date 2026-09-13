@@ -48,7 +48,8 @@ def health_check() -> dict[str, Any]:
     """Health check endpoint showing Groq API status and available models."""
     return {
         "status": "healthy",
-        "groq_api_configured": llm.available(),
+        "groq_api_configured": llm.groq_available(),
+        "snowflake_cortex_configured": llm.cortex_available(),
         "default_extract_models": config.EXTRACT_MODELS,
         "search_models": config.SEARCH_MODELS,
     }

@@ -190,7 +190,8 @@ def _groq_extract(text: str, said_on: date, hint: str | None = None) -> Extracti
         raise llm.LLMError("model returned no JSON")
     loc = data.get("location") or {}
     ext = Extraction(said_on=said_on, context=str(data.get("context") or "other"), summary=str(data.get("summary") or ""),
-                     location=Location(loc.get("city"), loc.get("region"), loc.get("country")), parser=f"groq {model}")
+                     location=Location(loc.get("city"), loc.get("region"), loc.get("country")),
+                     parser=(f"snowflake cortex {model[len(config.CORTEX_PREFIX):]}" if llm.is_cortex(model) else f"groq {model}"))
     for raw in (data.get("items") or [])[:15]:
         item = _validated(raw, len(ext.items) + 1)
         if item:
