@@ -10,7 +10,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from legit import config, llm
+from legit import community, config, llm
 
 from . import models, service, storage
 
@@ -50,6 +50,7 @@ def health_check() -> dict[str, Any]:
         "status": "healthy",
         "groq_api_configured": llm.groq_available(),
         "snowflake_cortex_configured": llm.cortex_available(),
+        "community_memory_configured": community.enabled(),
         "default_extract_models": config.EXTRACT_MODELS,
         "search_models": config.SEARCH_MODELS,
     }

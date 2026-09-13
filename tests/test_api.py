@@ -11,6 +11,9 @@ from pathlib import Path
 # Add repo root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+# Keep test scans out of the shared community scam memory.
+os.environ["COMMUNITY_MEMORY"] = "off"
+
 from fastapi.testclient import TestClient
 from api.main import app
 

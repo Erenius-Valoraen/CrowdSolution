@@ -5,7 +5,7 @@ import re
 import sys
 from datetime import date
 
-from . import extract
+from . import community, extract
 from .checkers import benchmark, college, patterns, registry, reputation, statistic, web
 from .models import Extraction, Finding, Item, Report
 
@@ -57,8 +57,13 @@ def check_official(ext: Extraction, notes: list[str]) -> tuple[list[Finding], li
 
 
 def finish(ext: Extraction, findings: list[Finding], needs_web: list[Item], notes: list[str], *,
-           offline: bool, progress=_progress) -> Report:
-    """Web fallback for unresolved items, then mark anything still unchecked as unverified."""
+           offline: bool, progress=_progress, text: str | None = None) -> Report:
+    """Community memory, web fallback for unresolved items, then mark anything still unchecked as unverified.
+
+    Pass the original text to check it against, and save it to, the shared scam memory."""
+    lookup = community.check(ext, text, findings, notes, progress) if text is not None else None
+    if lookup is not None:
+        findings.extend(lookup.findings)
     if needs_web and not offline:
         progress(f"Searching the web for {len(needs_web)} item(s) without official records (this can take a minute)...")
         web_findings, web_notes = web.verify(needs_web, ext)
@@ -74,7 +79,10 @@ def finish(ext: Extraction, findings: list[Finding], needs_web: list[Item], note
             findings.append(Finding(item, "unverified", f"No record found: {shorten(str(label))}",
                                     "Nothing in official data or web results confirmed this. Verify it yourself before acting.",
                                     "router"))
-    return Report(ext, dedupe(findings), notes)
+    report = Report(ext, dedupe(findings), notes)
+    if lookup is not None:
+        community.remember(report, text, lookup, notes)
+    return report
 
 
 def dedupe(findings: list[Finding]) -> list[Finding]:
@@ -134,7 +142,7 @@ def run(text: str, said_on: date, *, offline: bool = False, progress=_progress, 
     ext, notes = extract.extract(text, said_on, hint=hint)
     progress("Checking official data...")
     findings, needs_web = check_official(ext, notes)
-    return finish(ext, findings, needs_web, notes, offline=offline, progress=progress)
+    return finish(ext, findings, needs_web, notes, offline=offline, progress=progress, text=text)
 
 
 def run_long(text: str, said_on: date, *, offline: bool = False, progress=_progress, hint: str | None = None) -> Report:
@@ -168,4 +176,4 @@ def run_long(text: str, said_on: date, *, offline: bool = False, progress=_progr
         part_findings, part_needs = check_official(ext, notes)
         findings.extend(part_findings)
         needs_web.extend(part_needs)
-    return finish(combined, findings, needs_web, notes, offline=offline, progress=progress)
+    return finish(combined, findings, needs_web, notes, offline=offline, progress=progress, text=text)

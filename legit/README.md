@@ -79,6 +79,7 @@ Without a key, keyword rules still catch common scam patterns, rents, wages, and
 | Statistic | Was this official number true when it was said? | Point-in-time economic data |
 | College | Is this claim about a school or major accurate? How do two schools really compare? | College Scorecard: admissions, tuition, net price, graduation, earnings by school and by major, debt. OpenAlex research output for any university, including Canadian ones. |
 | Patterns | Is this a known scam tactic? | FTC and Canadian Anti-Fraud Centre guidance |
+| Community | Did other students already report this scam? | Shared scam memory in Backboard.io: exact matches on emails, suspicious domains, and phone numbers, plus similar messages. Checks with red flags are saved automatically. Set `BACKBOARD_API` in `.env`; `COMMUNITY_MEMORY=off` disables it. |
 
 3. **Search the web for the rest.** Anything official data couldn't settle goes into one batched Groq browser-search request, with cited sources.
 4. **Report.** HIGH RISK if anything is a red flag, BE CAREFUL for cautions, and NO RED FLAGS FOUND otherwise. Every finding says whether it came from official data, official guidance, or the web.

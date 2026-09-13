@@ -33,6 +33,7 @@ legit/          the checking engine
   router.py         sends each claim to the right checker
   checkers/         official data checks -> Snowflake (public data, College Scorecard, cached benchmarks)
   checkers/web.py   web search for anything official data can't settle -> Groq browser search
+  community.py      shared scam memory across students: match earlier reports, save new ones -> Backboard.io
   youtube.py        transcript fetching and timestamps (not exposed over HTTP yet, see section 8)
 ```
 
@@ -57,8 +58,9 @@ Backend prerequisites, already set up on Abhi's machine:
 | Benchmark tables | Run `sql/setup/04_benchmarks.sql` and `sql/setup/05_college_scorecard.sql` once | Needs the College Scorecard Marketplace listing |
 | Groq key | `.env`: `GROQ_API_KEY=` | Web search and backup extraction |
 | Snowflake Cortex | `.env`: `PIVOT_AI=` (access token) and `CORTEX_ACCOUNT=BXUDSLD-KS59503` | Primary extraction. Check with `python scripts/check_cortex.py` |
+| Backboard.io | `.env`: `BACKBOARD_API=` | Shared scam memory. The assistant `crowdsolution-community-memory` is found or created automatically. `COMMUNITY_MEMORY=off` disables it, for example in tests. |
 
-`GET /api/health` reports `groq_api_configured` and `snowflake_cortex_configured`.
+`GET /api/health` reports `groq_api_configured`, `snowflake_cortex_configured`, and `community_memory_configured`.
 
 ---
 
@@ -146,7 +148,7 @@ Real examples: [`verify_rental_scam.json`](examples/verify_rental_scam.json), [`
 | `status_label` / `color` | Backend labels: RED FLAG/red, CAUTION/yellow, OK/green, INFO/blue, UNVERIFIED/gray. The terminal UI renames them CHECKS OUT, CONTEXT, UNCONFIRMED, which read better for students. |
 | `quote` | Exact words from the text. Can be empty. |
 | `checker` | Which checker produced it. **Pick the layout from `checker` plus `data.type`.** |
-| `evidence[].kind` | `official` (government data), `guidance` (FTC or Canadian Anti-Fraud Centre advice), `web` (web search). Style these differently. |
+| `evidence[].kind` | `official` (government data), `guidance` (FTC or Canadian Anti-Fraud Centre advice), `web` (web search), `community` (earlier student reports). Style these differently. |
 | `evidence[].url` | Clickable when present. |
 | `data` | Structured numbers for charts and tables. Shapes in section 6. Can be `{}`. |
 
@@ -157,14 +159,38 @@ Real examples: [`verify_rental_scam.json`](examples/verify_rental_scam.json), [`
 The terminal UI in [`legit/demo.py`](../legit/demo.py) is the reference design. Run `python -m legit` and paste text to see it. Suggested page order, matching it:
 
 1. Headline (`overall_badge`, `counts`, `summary`)
-2. Warning signs
-3. Who's behind it
-4. Is the price normal?
-5. Schools and majors
-6. Official numbers
-7. Other claims (web)
-8. Couldn't confirm
-9. Action checklist and disclaimer
+2. Reported by other students
+3. Warning signs
+4. Who's behind it
+5. Is the price normal?
+6. Schools and majors
+7. Official numbers
+8. Other claims (web)
+9. Couldn't confirm
+10. Action checklist and disclaimer
+
+### Reported by other students: `checker: "community"`, `data.type: "community"`
+
+Shared scam memory stored in Backboard.io. Every check with red flags is saved, and later checks match against it.
+
+```json
+{"type": "community", "match": "exact",
+ "matched": [{"kind": "email", "value": "greenview.rentals@gmail.com"}],
+ "reports": 2, "first_seen": "2026-09-13", "last_seen": "2026-09-13", "context": "housing",
+ "red_flags": ["Rent compared with local median", "Pay before you can verify", "Hard-to-reverse payment method"],
+ "summary": "A rental listing for a 2-bedroom apartment near UT Austin with an unusually low price and pressure to pay a deposit via Zelle without viewing.",
+ "distance": null}
+```
+
+| `match` | Status | Meaning |
+|---|---|---|
+| `exact` | `red_flag` | An email, suspicious domain, or phone number in this text was in an earlier scam report. `matched` lists them. |
+| `same_message` | `red_flag` | An almost identical message was reported before (semantic `distance` ≤ 0.25). |
+| `similar` | `caution` | A closely similar scam was reported before (`distance` ≤ 0.45). Lower distance means more similar. |
+
+`reports` counts how many times students hit that scam. `summary` and `red_flags` describe the earlier report, not the current text. The finding's `quote` is the matched values for `exact`, or the earlier summary otherwise. Evidence uses `kind: "community"` ("student reports").
+
+**Render:** put this right under the headline when present; it's the most persuasive signal. Show the matched values, "Reported N times, last on DATE", the earlier summary, and the earlier red flags. Label it as student reports, distinct from official data and web results.
 
 ### Warning signs: `checker: "patterns"`, `data.type: "pattern"`
 

@@ -43,5 +43,11 @@ CORTEX_MODELS = _models("CORTEX_MODELS", "claude-haiku-4-5,openai-gpt-5-mini,lla
 # Tried in order; the next model is used when one hits a rate limit or is unavailable.
 # Snowflake Cortex goes first when configured; Groq models are the backup.
 EXTRACT_MODELS = ([CORTEX_PREFIX + m for m in CORTEX_MODELS] if cortex_configured() else []) + GROQ_EXTRACT_MODELS
+# Backboard.io shared scam memory across students.
+BACKBOARD_KEY = os.environ.get("BACKBOARD_API_KEY") or os.environ.get("BACKBOARD_API")
+BACKBOARD_COMMUNITY_ASSISTANT = os.environ.get("BACKBOARD_COMMUNITY_ASSISTANT", "crowdsolution-community-memory")
+BACKBOARD_COMMUNITY_ASSISTANT_ID = os.environ.get("BACKBOARD_COMMUNITY_ASSISTANT_ID")
+COMMUNITY_MEMORY = os.environ.get("COMMUNITY_MEMORY", "on").strip().lower() not in ("off", "0", "false", "no")
+
 # Web search needs Groq's browser_search tool, which Cortex chat completions don't offer.
 SEARCH_MODELS = _models("GROQ_SEARCH_MODELS", f"{SEARCH_MODEL},openai/gpt-oss-20b")

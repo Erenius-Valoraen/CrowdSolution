@@ -9,7 +9,8 @@ from datetime import date
 from .models import SEVERITY, Report
 
 TAGS = {"red_flag": "RED FLAG", "caution": "CAUTION", "unverified": "UNVERIFIED", "info": "INFO", "ok": "OK"}
-KIND_LABELS = {"official": "official data", "web": "web", "guidance": "official guidance", "ai": "AI reading"}
+KIND_LABELS = {"official": "official data", "web": "web", "guidance": "official guidance", "ai": "AI reading",
+               "community": "student reports"}
 WIDTH = 100
 
 

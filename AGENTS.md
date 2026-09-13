@@ -22,5 +22,6 @@ python -m unittest discover -s tests
 - **Never commit secrets.** Keys live in `.env` (gitignored) and `~/.snowflake/connections.toml`. Never put keys in frontend or extension code.
 - **Ask the user before committing or pushing.**
 - **Web search is on by default** in the API (`offline: false`). Keep it that way unless the user says otherwise.
+- **Community scam memory is shared and real.** Every check with red flags is saved to Backboard. Set `COMMUNITY_MEMORY=off` in tests and experiments, or use `BACKBOARD_COMMUNITY_ASSISTANT=<test name>`, so test scans don't pollute it. It only stores scammer indicators, red flags, a summary, and a short excerpt, never student details.
 - **Build UI on `checker`, `status`, and `data`,** not on title or summary text, which the AI phrases differently each run.
 - **Don't let the AI write SQL.** Checkers run fixed, parameterized queries. New data sources get a new checker in `legit/checkers/` and a line in `OFFICIAL` in `legit/router.py`.

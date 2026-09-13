@@ -105,6 +105,33 @@ def header(console: Console, report: Report) -> None:
     console.print(Panel(Group(*parts), border_style=tone, padding=(1, 2)))
 
 
+def community(console: Console, fs: list[Finding]) -> None:
+    if not fs:
+        return
+    section(console, "Reported by other students", "Scams other students checked here before, remembered with Backboard")
+    for f in fs:
+        d = f.data
+        grid = Table.grid(padding=(0, 2))
+        grid.add_column(style="bold", no_wrap=True)
+        grid.add_column()
+        if d.get("matched"):
+            grid.add_row("Matched", Text(", ".join(m["value"] for m in d["matched"]), style=f"bold {color(f.status)}"))
+        reports = d.get("reports") or 1
+        seen = Text(f"{reports} report{'s' if reports != 1 else ''}")
+        if d.get("first_seen"):
+            seen.append(f"  |  first {d['first_seen']}  |  last {d.get('last_seen') or d['first_seen']}", style="dim")
+        grid.add_row("Reported", seen)
+        if d.get("summary"):
+            grid.add_row("That report", Text(d["summary"]))
+        if d.get("red_flags"):
+            grid.add_row("Red flags then", Text("; ".join(d["red_flags"][:4])))
+        grid.add_row("", Text(""))
+        grid.add_row("Bottom line", Text(f.summary.split(" Red flags in that report")[0]))
+        title = Text(f" {f.title} ", style="bold")
+        title.append_text(badge(f.status))
+        console.print(Panel(grid, title=title, title_align="left", border_style=color(f.status), padding=(1, 2)))
+
+
 def warning_signs(console: Console, fs: list[Finding]) -> None:
     if not fs:
         return
@@ -352,6 +379,7 @@ def render(report: Report, *, console: Console | None = None, **_ignored) -> Non
     web_for = lambda *kinds: [f for f in fs if f.checker == "web" and f.item.kind in kinds]  # noqa: E731
 
     header(console, report)
+    community(console, by_checker("community"))
     warning_signs(console, by_checker("patterns"))
     organizations(console, by_checker("registry", "reputation") + web_for("entity"))
     prices(console, by_checker("benchmark") + web_for("price"))
