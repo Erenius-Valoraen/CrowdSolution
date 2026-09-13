@@ -49,5 +49,16 @@ BACKBOARD_COMMUNITY_ASSISTANT = os.environ.get("BACKBOARD_COMMUNITY_ASSISTANT", 
 BACKBOARD_COMMUNITY_ASSISTANT_ID = os.environ.get("BACKBOARD_COMMUNITY_ASSISTANT_ID")
 COMMUNITY_MEMORY = os.environ.get("COMMUNITY_MEMORY", "on").strip().lower() not in ("off", "0", "false", "no")
 
-# Web search needs Groq's browser_search tool, which Cortex chat completions don't offer.
+# Web checks search, then these models read the results (Cortex first, like extraction).
+READ_MODELS = EXTRACT_MODELS
+# Optional search APIs. Without one, web checks use DuckDuckGo's HTML page, which blocks heavy automated use.
+TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY") or os.environ.get("TAVILY_API")
+BRAVE_SEARCH_API_KEY = os.environ.get("BRAVE_SEARCH_API_KEY")
+# Voice typing: Groq Whisper speech-to-text, tried in order when one is rate limited.
+TRANSCRIBE_MODELS = _models("GROQ_TRANSCRIBE_MODELS", "whisper-large-v3-turbo,whisper-large-v3")
+# Spoken results: Groq text-to-speech. Its terms must be accepted once in the Groq console; until then the web app
+# falls back to the browser's built-in voice.
+TTS_MODEL = os.environ.get("GROQ_TTS_MODEL", "canopylabs/orpheus-v1-english")
+TTS_VOICE = os.environ.get("GROQ_TTS_VOICE", "hannah")
+# Backup web search uses Groq's browser_search tool, which Cortex chat completions don't offer.
 SEARCH_MODELS = _models("GROQ_SEARCH_MODELS", f"{SEARCH_MODEL},openai/gpt-oss-20b")

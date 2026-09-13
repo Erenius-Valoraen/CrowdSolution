@@ -19,6 +19,20 @@ STATUS = {
 }
 
 
+MONTHLY = re.compile(r"\b(for the month|month[- ]over[- ]month|m/m|monthly|from the (?:prior|previous) month)\b", re.I)
+MISREAD_RATIO = 8  # official figures this far from the claim usually mean a different measure was read, not a wrong claim
+
+
+def looks_misread(claimed: float, official: float | None, measure: str | None, text: str) -> bool:
+    """True when the claim was probably matched to the wrong measure, e.g. a monthly 0.3% raise checked against
+    the yearly change, or a monthly job gain checked against total jobs. The web check handles those instead."""
+    if measure == "yoy_pct" and MONTHLY.search(text or ""):
+        return True
+    if official is None or claimed <= 0 or official <= 0:
+        return False
+    return max(claimed, official) / min(claimed, official) >= MISREAD_RATIO
+
+
 SUBGROUP = re.compile(
     r"\b(recent grads?|graduates|majors?|degree holders|nurs\w*|engineer\w*|teachers?|developers?|doctors?|industry|"
     r"industries|sector|occupations?|construction|among|for (?:young|black|white|hispanic|asian|women|men|teens?)"
@@ -50,6 +64,9 @@ def check(item: Item, ext: Extraction) -> Finding | None:
     status = STATUS.get(res.verdict)
     if status is None or res.measure is None:
         return None
+    official = next((fig.value for fig in (res.then, res.fallback, res.latest) if fig is not None and fig.value is not None), None)
+    if status != "ok" and looks_misread(value, official, res.measure, item.text):
+        return None
 
     evidence = []
     figures = {}
@@ -68,4 +85,6 @@ def check(item: Item, ext: Extraction) -> Finding | None:
         summary += " " + " ".join(res.notes)
     if ext.location.is_canada:
         summary += " Note: this is a US statistic."
-    return Finding(item, status, f"{metric.label}: {res.where}", summary, "statistic", evidence, data=data)
+    # US data can't settle a claim made in a Canadian context, so also look it up online.
+    return Finding(item, status, f"{metric.label}: {res.where}", summary, "statistic", evidence,
+                   web_followup=ext.location.is_canada, data=data)

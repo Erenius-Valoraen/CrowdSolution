@@ -69,6 +69,9 @@ Backend prerequisites, already set up on Abhi's machine:
 | Method | Path | Use |
 |---|---|---|
 | `POST` | `/api/verify` | Check text. The main endpoint. |
+| `POST` | `/api/transcribe` | Voice typing: audio in, text out (see below) |
+| `POST` | `/api/scans/{id}/spoken-summary` | A short summary of the results to read aloud (see below) |
+| `POST` | `/api/speak` | Text to speech: `{"text"}` in, WAV audio out, or `503` to use the browser's voice |
 | `GET` | `/api/scans/{id}` | Fetch a saved result, for share links like `/r/{id}` |
 | `GET` | `/api/history?limit=20&offset=0` | Recent checks, newest first |
 | `GET` | `/api/examples` | Five demo texts for one-click buttons |
@@ -88,11 +91,32 @@ Request:
 
 | Field | Default | Meaning |
 |---|---|---|
-| `text` | required | Anything: a listing, message, post, article, or a whole transcript. Long text is split and checked in parts automatically. |
+| `text` | required | Anything: a listing, message, post, article, or a whole transcript. Long text is split and checked in parts automatically. **A YouTube link on its own** (`youtube.com/watch?v=`, `youtu.be/`, `shorts/`, `live/`, `embed/`) fetches that video's captions and checks them instead; see "YouTube videos" below. |
 | `seen_on` | today | Date the student saw it. Statistics are judged against what was published on that date. Usually leave it out. |
 | `offline` | `false` | **Web search is on by default.** `true` skips web search for a faster check. Don't expose this to students; it's for testing. |
 
-Errors: `400` for empty text, `422` for a malformed body, `500` with `detail` if the engine fails.
+Errors: `400` for empty text, `422` for a malformed body or a YouTube video we can't read (captions off, private, YouTube blocking the server; `detail` is a student-friendly sentence you can show as is), `500` with `detail` if the engine fails.
+
+#### YouTube videos
+
+When `text` is only a YouTube link, the API reads the video's English captions (creator captions preferred over auto-generated), checks the first 6 transcript sections (about 20 minutes of speech), and judges statistics against what was published on the **upload date**. It takes longer than text: allow up to about two minutes with web search on. The response has the usual fields plus:
+
+- `video`: `{id, url, title, channel, upload_date, language, auto_captions, thumbnail, duration, duration_label, sections_total, sections_checked, checked_until, checked_until_label, fully_checked, transcript}`. `transcript` is a list of `{seconds, timestamp, text, checked}` lines of about 220 characters; `checked: false` lines are past the part we checked.
+- Each finding's `seconds` and `timestamp` (e.g. `125.4`, `"2:05"`): where it was said. Link to `{video.url}?t={floor(seconds)}`. Both are `null` for text checks.
+
+#### Voice typing: `POST /api/transcribe`
+
+Record with `MediaRecorder` and send the recording as the **raw request body** with its MIME type as `Content-Type` (`audio/webm;codecs=opus` from Chrome and Firefox, `audio/mp4` from Safari; ogg, mp3, wav, and flac also work). The server transcribes it with Groq Whisper (`whisper-large-v3-turbo`, falling back to `whisper-large-v3`) and returns `{"text": "...", "model": "..."}`. Put the text in the textbox; don't auto-submit, so the student can fix mistakes. Nothing is checked or stored.
+
+Errors, each with a `detail` you can show as is: `415` unsupported type, `400` empty recording, `413` over 15 MB, `503` no Groq key on the server, `429` speech-to-text rate limited, `422` no words heard, `502` Groq failed. `GET /api/health` has `voice_input: true` when it's available; hide the mic otherwise. Microphone access needs `https` or `localhost`.
+
+#### Spoken results: `POST /api/scans/{id}/spoken-summary` and `POST /api/speak`
+
+When a student asks by voice, answer out loud too. After the results render, call `spoken-summary` for the scan: it returns `{"text", "source"}`, a 70 to 130 word summary written for listening (verdict, the key warnings with real numbers, what to do next). `source` is `ai` (Cortex, saved with the scan so replays match) or `template` (built from the results when no model is available). Show the text as captions while it plays.
+
+For audio, send one sentence at a time to `/api/speak` as `{"text": "..."}` (max 1,500 characters) and play the WAV it returns. It uses Groq text-to-speech (`canopylabs/orpheus-v1-english`, voice set by `GROQ_TTS_VOICE`). If it returns `503`, the model isn't enabled for the server's Groq account (its terms must be accepted once in the Groq console), so use the browser's `speechSynthesis` instead. Browsers only play sound after the student has interacted with the page; if playback is refused, show a "Tap to listen" button.
+
+The web app shows a video header with a coverage bar, a clickable timeline of markers colored by status, `▶ 2:05` links on every card, and the transcript with checked lines highlighted.
 
 ---
 
@@ -117,6 +141,7 @@ Real examples: [`verify_rental_scam.json`](examples/verify_rental_scam.json), [`
 | `grouped_findings` | same findings split by status | Convenience for status tabs |
 | `notes` | list of strings | **Developer-facing. Don't show raw.** Use them to detect rate limits (section 7). |
 | `raw_report` | `{parser, said_on, items_count}` | Debug only |
+| `video` | object or `null` | YouTube checks only. See "YouTube videos" in section 4. |
 
 ### Finding
 
@@ -151,6 +176,7 @@ Real examples: [`verify_rental_scam.json`](examples/verify_rental_scam.json), [`
 | `evidence[].kind` | `official` (government data), `guidance` (FTC or Canadian Anti-Fraud Centre advice), `web` (web search), `community` (earlier student reports). Style these differently. |
 | `evidence[].url` | Clickable when present. |
 | `data` | Structured numbers for charts and tables. Shapes in section 6. Can be `{}`. |
+| `seconds` / `timestamp` | YouTube checks only: where in the video it was said. `null` otherwise. |
 
 ---
 
@@ -321,14 +347,20 @@ In `official_domains`, show plain domains first (one dot) and hide foreign subsi
 ### Web results: `checker: "web"`, `data.type: "web"`
 
 ```json
-{"type": "web", "verdict": "contradicted",
- "question": "Is 700.0 (per month) a normal rent for Waterloo, Ontario, CA? Give the typical range.",
- "sources": [{"title": "Web source cited by the search", "url": "https://www.zumper.com/rent-research/waterloo-on"}]}
+{"type": "web", "verdict": "supported",
+ "question": "Canada lost 84,000 jobs in February 2026", "query": "Canada lost 84,000 jobs in February 2026",
+ "claimed": "84,000 jobs lost", "found": "84,000 jobs lost in February 2026",
+ "claimed_value": 84000, "found_value": 84000, "unit": "jobs", "as_of": "February 2026",
+ "sources": [{"title": "Labour Force Survey, February 2026", "url": "https://www150.statcan.gc.ca/...", "site": "statcan.gc.ca", "date": "2026-03-13"}]}
 ```
 
-`verdict`: `supported` becomes status `ok`, `contradicted` becomes `red_flag` for organizations or `caution` otherwise, and `unclear` becomes `unverified`.
+How it works: each open claim gets its own DuckDuckGo search (in parallel), the top page is skimmed for sentences with numbers, and Cortex reads the results in batches of 5. Sources are always real search results, never URLs the model made up. If the search engine refuses requests, one Groq browser-search call covers up to 6 claims instead.
 
-**Render:** show web findings for an organization inside its card, for a price inside the price section, and for a school inside the claims table. Show the rest in an "Other claims" list with source links. Label them clearly as web results.
+`verdict` to `status`: `supported` is `ok`; `contradicted` is `red_flag` for organizations and `caution` otherwise; `misleading` is `caution`; `context` is `info` (sources don't settle it but give the real figure in `found`); `unclear` is `unverified`.
+
+`claimed_value` and `found_value` are both numbers in the same `unit`, or both `null`. `claimed`, `found`, and `as_of` are short display strings and can be `null`.
+
+**Render:** show web findings for an organization inside its card, for a price inside the price section, and for a school inside the claims table. Show the rest under "Checked online" with claimed vs found figures (bars when both values are numbers) and the source sites as links. Web findings that are `unverified` with no `found` go under "Couldn't confirm".
 
 ### Couldn't confirm: `checker: "router"`, `data: {}`
 
@@ -341,11 +373,11 @@ Nothing confirmed these. **Render** a simple list of quotes under "Couldn't conf
 | Situation | Typical time | What happens |
 |---|---|---|
 | Web search off | 2 to 8 seconds | Official data and patterns only |
-| Web search on (default) | 6 to 60 seconds | One batched web search for up to 6 unresolved claims |
+| Web search on (default) | 6 to 40 seconds | A search per unresolved claim (up to 30), read by Cortex in batches of 5 |
 | Long text or transcript | adds about 4 seconds per 3,000 characters | Split into parts automatically |
 
 - **Use a request timeout of at least 120 seconds.** Show a loading state with changing messages, like "Reading...", "Checking official data...", "Searching the web...".
-- **Groq's free tier has a daily token cap, and one web search can use most of it.** When that happens the request still succeeds with official results. `notes` contains a message starting with `Web search hit Groq's rate limit`, and those claims show as `unverified`. Show a gentle line like "Web search is busy, so some claims couldn't be checked online."
+- **Web search is free and doesn't use Groq** unless the search engine refuses requests. Then the Groq browser-search backup runs, and Groq's free tier has a daily token cap one search can use most of. If that also fails, the request still succeeds with official results, `notes` contains a message starting with `Web search hit Groq's rate limit`, and those claims show as `unverified`. Show a gentle line like "Web search is busy, so some claims couldn't be checked online."
 - **If Cortex fails, extraction silently falls back to Groq.** If both fail, simple keyword rules still catch common scams and prices.
 - **The first request after starting the server is slower** because it opens the Snowflake connection.
 

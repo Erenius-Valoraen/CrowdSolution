@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 class VerifyRequest(BaseModel):
     """Request payload from frontend."""
-    text: str = Field(..., description="The listing, job offer, message, or claim text to verify.", min_length=1)
+    text: str = Field(..., description="The listing, job offer, message, or claim text to verify. A YouTube link on its own checks that video's transcript.", min_length=1)
     seen_on: str | None = Field(None, description="Date seen (YYYY-MM-DD), default is today.")
     offline: bool = Field(False, description="Web search is on by default. Set True to use only official data and scam patterns (faster, no web search tokens).")
 
@@ -35,6 +35,8 @@ class FindingItem(BaseModel):
     checker: str
     evidence: list[EvidenceItem] = []
     data: dict[str, Any] = {}
+    seconds: float | None = None      # YouTube checks only: where in the video this was said
+    timestamp: str | None = None
 
 
 class GroupedFindings(BaseModel):
@@ -74,6 +76,23 @@ class VerifyResponse(BaseModel):
     grouped_findings: GroupedFindings
     notes: list[str]
     raw_report: dict[str, Any]
+    video: dict[str, Any] | None = None  # YouTube checks only: title, channel, coverage, and transcript lines
+
+
+class TranscribeResponse(BaseModel):
+    """Voice typing result: the words to put in the textbox."""
+    text: str
+    model: str
+
+
+class SpokenSummaryResponse(BaseModel):
+    """A short summary of a check's results, written to be read aloud."""
+    text: str
+    source: Literal["ai", "template"]
+
+
+class SpeakRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=1500, description="Text to read aloud, e.g. one sentence of a spoken summary.")
 
 
 class HistoryItem(BaseModel):

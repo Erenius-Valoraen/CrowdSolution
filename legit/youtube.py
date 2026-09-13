@@ -65,6 +65,11 @@ class VideoInfo:
     upload_date: date | None = None
     language: str | None = None
     auto_captions: bool | None = None
+    duration: float | None = None
+    sections_total: int = 0
+    sections_checked: int = 0
+    checked_until: float | None = None
+    segments: list[Segment] = field(default_factory=list, repr=False)
 
     @property
     def url(self) -> str:
@@ -178,8 +183,13 @@ def check_video(url: str, *, offline: bool = False, max_sections: int = 6, seen_
     progress("Fetching video details and transcript...")
     info = fetch_info(video_id)
     segments, info.language, info.auto_captions = fetch_transcript(video_id)
+    if not segments:
+        raise ValueError("This video's transcript is empty.")
+    info.segments = segments
+    info.duration = segments[-1].start + segments[-1].duration
     said_on = seen_on or info.upload_date or date.today()
     sections = make_sections(segments)
+    info.sections_total = len(sections)
 
     notes: list[str] = []
     if info.upload_date is None and seen_on is None:
@@ -188,6 +198,8 @@ def check_video(url: str, *, offline: bool = False, max_sections: int = 6, seen_
         notes.append(f"Checked the first {max_sections} of {len(sections)} transcript sections "
                      f"(up to {timestamp(sections[max_sections - 1].end)}). Use --max-sections for more.")
         sections = sections[:max_sections]
+    info.sections_checked = len(sections)
+    info.checked_until = sections[-1].end
 
     about = f' titled "{info.title}"' if info.title else ""
     about += f" from {info.channel}" if info.channel else ""
@@ -261,7 +273,7 @@ def to_json(info: VideoInfo, report: Report, timed: list[TimedFinding]) -> str:
         raise TypeError(type(o).__name__)
 
     return json.dumps({
-        "video": dataclasses.asdict(info) | {"url": info.url},
+        "video": {k: v for k, v in dataclasses.asdict(info).items() if k != "segments"} | {"url": info.url},
         "overall": report.overall,
         "findings": [{"seconds": t.seconds, "timestamp": timestamp(t.seconds), **dataclasses.asdict(t.finding)} for t in timed],
         "notes": report.notes,

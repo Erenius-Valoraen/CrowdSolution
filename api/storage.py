@@ -63,6 +63,16 @@ def save_scan(
         conn.close()
 
 
+def update_payload(scan_id: str, payload: dict[str, Any]) -> None:
+    """Replace a saved scan's payload, e.g. to cache its spoken summary. The check results themselves don't change."""
+    conn = get_connection()
+    try:
+        with conn:
+            conn.execute("UPDATE scans SET payload_json = ? WHERE id = ?", (json.dumps(payload), scan_id))
+    finally:
+        conn.close()
+
+
 def get_scan(scan_id: str) -> dict[str, Any] | None:
     conn = get_connection()
     try:

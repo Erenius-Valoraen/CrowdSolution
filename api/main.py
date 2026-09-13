@@ -5,16 +5,19 @@ Transfers structured verification reports to the frontend in clean JSON.
 from __future__ import annotations
 
 import os
+from functools import lru_cache
 from typing import Any
 
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from legit import community, config, llm
+from legit.checkers import web
 
 from . import models, service, storage
 
@@ -22,7 +25,7 @@ from . import models, service, storage
 storage.init_storage()
 
 app = FastAPI(
-    title="CrowdSolution Verification API",
+    title="Trustify API",
     description="Fact-checking and risk-rating API for university students. Checks rental listings, job offers, and claims.",
     version="2.1.0",
 )
@@ -43,7 +46,7 @@ app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 @app.get("/", include_in_schema=False)
 def web_app() -> FileResponse:
-    """The Legit Check web app."""
+    """The Trustify web app."""
     return FileResponse(FRONTEND_DIR / "index.html")
 
 
@@ -56,7 +59,7 @@ def favicon() -> Response:
 @app.get("/api")
 def root() -> dict[str, str]:
     return {
-        "name": "CrowdSolution Verification API",
+        "name": "Trustify API",
         "version": "2.1.0",
         "status": "online",
         "docs_url": "/docs",
@@ -71,6 +74,9 @@ def health_check() -> dict[str, Any]:
         "groq_api_configured": llm.groq_available(),
         "snowflake_cortex_configured": llm.cortex_available(),
         "community_memory_configured": community.enabled(),
+        "web_search_provider": web.provider(),
+        "voice_input": llm.groq_available(),
+        "voice_output_model": config.TTS_MODEL if llm.groq_available() else None,
         "default_extract_models": config.EXTRACT_MODELS,
         "search_models": config.SEARCH_MODELS,
     }
@@ -92,8 +98,85 @@ def verify_claim(req: models.VerifyRequest) -> dict[str, Any]:
             offline=req.offline,
         )
         return response_data
+    except service.InputError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Verification failed: {str(e)}")
+
+
+MAX_AUDIO_BYTES = 15 * 1024 * 1024  # about 15 minutes of browser-recorded speech; Groq accepts up to 25 MB
+MIN_AUDIO_BYTES = 1000
+VOICE_PROMPT = ("A university student asking whether something is legit: a rental listing, lease, job offer, bank "
+                "message, tuition, or a college or major. Zelle, e-transfer, Interac, UT Austin, UCLA, MIT, College Scorecard.")
+
+
+@app.post("/api/transcribe", response_model=models.TranscribeResponse)
+async def transcribe_audio(request: Request) -> dict[str, str]:
+    """
+    Voice typing. Send the recording as the raw request body with its Content-Type (e.g. `audio/webm`).
+    Returns the text so the frontend can put it in the textbox; nothing is checked or saved.
+    """
+    content_type = request.headers.get("content-type", "")
+    if llm.audio_extension(content_type) is None:
+        raise HTTPException(status_code=415, detail="Send the recording as webm, ogg, mp4/m4a, mp3, wav, or flac audio.")
+    if int(request.headers.get("content-length") or 0) > MAX_AUDIO_BYTES:
+        raise HTTPException(status_code=413, detail="That recording is too long. Keep it under a few minutes.")
+    audio = await request.body()
+    if len(audio) > MAX_AUDIO_BYTES:
+        raise HTTPException(status_code=413, detail="That recording is too long. Keep it under a few minutes.")
+    if len(audio) < MIN_AUDIO_BYTES:
+        raise HTTPException(status_code=400, detail="No audio came through. Click the mic, speak, then click it again.")
+    if not llm.groq_available():
+        raise HTTPException(status_code=503, detail="Voice typing isn't set up on this server.")
+    try:
+        text, model = await run_in_threadpool(llm.transcribe, audio, content_type, prompt=VOICE_PROMPT)
+    except llm.RateLimited:
+        raise HTTPException(status_code=429, detail="Voice typing is busy right now. Try again in a minute, or type instead.")
+    except llm.LLMError as e:
+        raise HTTPException(status_code=502, detail=f"Couldn't turn that into text: {e}")
+    if not text:
+        raise HTTPException(status_code=422, detail="We didn't catch any words. Try again a little closer to the mic.")
+    return {"text": text, "model": model}
+
+
+@app.post("/api/scans/{scan_id}/spoken-summary", response_model=models.SpokenSummaryResponse)
+def spoken_summary(scan_id: str) -> dict[str, str]:
+    """
+    A 70 to 130 word summary of a check's results, written to be read aloud: verdict, key warnings with numbers,
+    and what to do. Saved with the scan, so asking again returns the same words.
+    """
+    data = storage.get_scan(scan_id)
+    if not data:
+        raise HTTPException(status_code=404, detail=f"Scan '{scan_id}' not found.")
+    if data.get("spoken_summary"):
+        return data["spoken_summary"]
+    text, source = service.spoken_summary(data)
+    result = {"text": text, "source": source}
+    if source == "ai":  # the template is instant, so only cache AI-written summaries
+        storage.update_payload(scan_id, dict(data, spoken_summary=result))
+    return result
+
+
+@lru_cache(maxsize=128)
+def _speech(text: str) -> bytes:
+    """Replays and repeated sentences don't cost another text-to-speech request."""
+    return llm.speak(text)
+
+
+@app.post("/api/speak", responses={200: {"content": {"audio/wav": {}}, "description": "WAV audio"}})
+def speak(req: models.SpeakRequest) -> Response:
+    """Read text aloud with Groq text-to-speech. Returns WAV audio, or 503 so the frontend can use the browser's voice."""
+    if not llm.groq_available():
+        raise HTTPException(status_code=503, detail="Natural voice isn't set up on this server.")
+    try:
+        audio = _speech(" ".join(req.text.split()))
+    except llm.SpeechUnavailable:
+        raise HTTPException(status_code=503, detail="Natural voice isn't enabled for this server's Groq account.")
+    except llm.RateLimited:
+        raise HTTPException(status_code=429, detail="The voice is busy right now. Try again in a minute.")
+    except llm.LLMError as e:
+        raise HTTPException(status_code=502, detail=f"Couldn't create audio: {e}")
+    return Response(content=audio, media_type="audio/wav", headers={"Cache-Control": "private, max-age=3600"})
 
 
 @app.get("/api/scans/{scan_id}", response_model=models.VerifyResponse)
@@ -148,6 +231,12 @@ def get_sample_examples() -> list[dict[str, str]]:
             "title": "Legitimate Waterloo Sublet Offer",
             "category": "housing",
             "text": "1 bedroom in a 5x5 apartment at 201 Lester St, Waterloo. $1,450/month including high-speed internet. In-person walkthrough available any weekday after 5 PM. Standard Ontario lease provided.",
+        },
+        {
+            "id": "ex_youtube",
+            "title": "YouTube Video (Jobs Report)",
+            "category": "finance",
+            "text": "https://www.youtube.com/watch?v=4sH30KUfPpM",
         },
         {
             "id": "ex_stat_claim",

@@ -71,6 +71,9 @@ def finish(ext: Extraction, findings: list[Finding], needs_web: list[Item], note
         notes.extend(web_notes)
     elif needs_web:
         notes.append(f"{len(needs_web)} item(s) had no official record; run without --offline to search the web.")
+    # When the web settles an item, an official "couldn't confirm" for it (e.g. data not published yet) only adds noise.
+    answered_online = {f.item.id for f in findings if f.checker == "web" and f.status != "unverified"}
+    findings = [f for f in findings if not (f.status == "unverified" and f.checker != "web" and f.item.id in answered_online)]
 
     covered = {f.item.id for f in findings}
     for item in needs_web:

@@ -3,28 +3,56 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Legit Check</title>
-  <meta name="description" content="Paste a listing, job offer, message, or post. We check it against official data, student reports, and the web.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233b5bfd'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <title>Trustify</title>
+  <meta name="description" content="Paste a listing, job offer, message, post, or YouTube link. We check it against official data, student reports, and the web.">
+  <meta name="theme-color" content="#FBFBFA" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#191918" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg transform='rotate(-8 16 16)'%3E%3Cpath d='M8.5 3.5h15a2 2 0 0 1 2 2V27l-2.9 2.4-2.9-2.4-2.9 2.4-2.9-2.4-2.9 2.4-2.9-2.4V5.5a2 2 0 0 1 2-2z' fill='%23111111'/%3E%3Cpath d='M11 15.5l3.6 3.6 6.9-7.6' stroke='%23FBFBFA' stroke-width='2.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="ambient" aria-hidden="true"></div>
+
   <header class="topbar">
-    <a class="brand" href="/" aria-label="Legit Check home">
-      <span class="brand-mark" aria-hidden="true">✓</span>
-      <span class="brand-text"><strong>Legit Check</strong><span class="brand-tag">Show me the receipts</span></span>
+    <a class="brand" href="/" aria-label="Trustify home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32">
+          <g class="mark-receipt">
+            <path class="mark-paper" d="M8.5 3.5h15a2 2 0 0 1 2 2V27l-2.9 2.4-2.9-2.4-2.9 2.4-2.9-2.4-2.9 2.4-2.9-2.4V5.5a2 2 0 0 1 2-2z"/>
+            <path class="mark-check" d="M11 15.5l3.6 3.6 6.9-7.6"/>
+          </g>
+        </svg>
+      </span>
+      <span class="brand-text"><span class="brand-name">Trust<em>ify</em></span><span class="brand-tag">Show me the receipts</span></span>
     </a>
     <button id="history-btn" class="btn btn-ghost" type="button" aria-controls="history" aria-expanded="false">History</button>
   </header>
 
-  <main class="layout">
+  <main id="main" class="layout">
     <section class="composer" aria-labelledby="composer-title">
+      <p class="eyebrow">For students living on their own</p>
       <h1 id="composer-title">Is this legit?</h1>
-      <p class="lede">Paste a rental listing, a job offer, a message from a "bank", a post about colleges, or a video transcript. We check every claim against official data, other students' reports, and the web.</p>
+      <p class="lede">Paste a rental listing, a job offer, a message from a "bank", a post about colleges, or a YouTube link. We check every claim against official data, other students' reports, and the web.</p>
 
       <form id="check-form" class="composer-card">
         <label class="sr-only" for="text">Text to check</label>
-        <textarea id="text" name="text" rows="7" placeholder="Paste anything here..." autocomplete="off" spellcheck="true"></textarea>
+        <textarea id="text" name="text" rows="6" placeholder="Paste anything here, or a YouTube link" autocomplete="off" spellcheck="true"></textarea>
+        <div id="video-hint" class="video-hint" hidden aria-live="polite">
+          <span class="video-hint-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 5.2v13.6L19 12z" fill="currentColor"/></svg>
+          </span>
+          <span><strong>YouTube link.</strong> We'll pull the video's transcript and check what it says, with timestamps.</span>
+        </div>
+        <div id="voice-status" class="voice-status" data-state="idle" hidden aria-live="polite">
+          <span class="voice-dot" aria-hidden="true"></span>
+          <span class="voice-meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <span id="voice-text"></span>
+          <button id="voice-cancel" class="btn-link" type="button" hidden>Cancel</button>
+        </div>
         <div class="composer-bar">
           <div class="composer-left">
             <label class="toggle">
@@ -32,23 +60,36 @@
               <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
               <span>Search the web too</span>
             </label>
-            <span id="char-count" class="muted small">0 characters</span>
+            <span id="char-count" class="char-count">0 characters</span>
           </div>
-          <button id="submit" class="btn btn-primary" type="submit" disabled>Check it <kbd>Ctrl ↵</kbd></button>
+          <div class="composer-actions">
+            <button id="mic" class="btn btn-ghost mic" type="button" data-state="idle" aria-pressed="false" aria-label="Voice type" title="Voice type: click to start talking, click again to stop" hidden>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+              <span class="mic-label">Speak</span>
+            </button>
+            <button id="submit" class="btn btn-primary" type="submit" disabled>Check it <kbd>Ctrl ↵</kbd></button>
+          </div>
         </div>
       </form>
 
       <div class="examples" aria-label="Examples">
-        <span class="muted small">Try an example:</span>
+        <span class="examples-label">Try an example</span>
         <div id="examples" class="chips"></div>
       </div>
     </section>
 
-    <section id="loading" class="loading" hidden aria-live="polite">
-      <div class="spinner" aria-hidden="true"></div>
-      <div>
-        <div id="loading-text" class="loading-text">Reading the text…</div>
-        <div id="loading-hint" class="muted small">Web search can take up to a minute.</div>
+    <section id="loading" class="loading" hidden aria-live="polite" aria-busy="true">
+      <div class="loading-head">
+        <span class="loading-pulse" aria-hidden="true"></span>
+        <div>
+          <div id="loading-text" class="loading-text">Reading the text…</div>
+          <div id="loading-hint" class="loading-hint">Web search can take up to a minute.</div>
+        </div>
+      </div>
+      <ol id="loading-steps" class="loading-steps"></ol>
+      <div class="skeleton" aria-hidden="true">
+        <span class="skeleton-title"></span><span></span><span></span>
+        <div class="skeleton-row"><span></span><span></span><span></span></div>
       </div>
     </section>
 
@@ -60,12 +101,14 @@
   <aside id="history" class="drawer" hidden aria-labelledby="history-title">
     <div class="drawer-head">
       <h2 id="history-title">Recent checks</h2>
-      <button id="close-history" class="btn btn-ghost" type="button" aria-label="Close history">✕</button>
+      <button id="close-history" class="btn btn-ghost btn-icon" type="button" aria-label="Close history">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+      </button>
     </div>
     <div id="history-list" class="history-list"></div>
   </aside>
 
-  <footer class="footer muted small">
+  <footer class="footer">
     A screening tool, not legal or financial advice. Open the sources before you act.
   </footer>
 

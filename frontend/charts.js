@@ -18,6 +18,35 @@ function h(tag, props, ...children) {
   return el;
 }
 
+/** Inline SVG icons on a 24px grid, drawn with currentColor so they follow the text color. No emoji or symbol glyphs. */
+const ICONS = {
+  play: '<path d="M8 5.2v13.6L19 12z" fill="currentColor" stroke="none"/>',
+  pause: '<rect x="6.5" y="5" width="3.6" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="13.9" y="5" width="3.6" height="14" rx="1" fill="currentColor" stroke="none"/>',
+  replay: '<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/>',
+  volume: '<path d="M4 9.5h3.2L12 5.5v13l-4.8-4H4z"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18.2 6.6a7.6 7.6 0 0 1 0 10.8"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  close: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+  alert: '<path d="M12 4l9 16H3z"/><path d="M12 10v4.2"/><path d="M12 17.3v.2"/>',
+  question: '<circle cx="12" cy="12" r="8.5"/><path d="M9.7 9.6a2.4 2.4 0 1 1 3.4 2.2c-.7.3-1.1.9-1.1 1.6v.4"/><path d="M12 16.9v.2"/>',
+  minus: '<circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/>',
+  external: '<path d="M9 7h8v8"/><path d="M17 7L7 17"/>',
+};
+
+function icon(name, className = '') {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  el.setAttribute('viewBox', '0 0 24 24');
+  el.setAttribute('class', `icon ${className}`.trim());
+  el.setAttribute('aria-hidden', 'true');
+  el.setAttribute('focusable', 'false');
+  el.setAttribute('fill', 'none');
+  el.setAttribute('stroke', 'currentColor');
+  el.setAttribute('stroke-width', '2');
+  el.setAttribute('stroke-linecap', 'round');
+  el.setAttribute('stroke-linejoin', 'round');
+  el.innerHTML = ICONS[name] || '';  // fixed markup from ICONS above, never user text
+  return el;
+}
+
 const Charts = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg';
 

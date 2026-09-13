@@ -1,11 +1,12 @@
 # Notes for AI agents working on this repo
 
-CrowdSolution is a PivotHacks 2026 project: an "is this legit?" checker for university students living on their own. Paste a listing, job offer, message, post, or transcript and it checks every claim against official data (Snowflake) and the web.
+Trustify (this repo is named CrowdSolution) is a PivotHacks 2026 project: an "is this legit?" checker for university students living on their own. Paste a listing, job offer, message, post, or transcript and it checks every claim against official data (Snowflake) and the web.
 
 ## Start here
 
 - **Building the frontend or browser extension:** read [docs/FRONTEND_GUIDE.md](docs/FRONTEND_GUIDE.md). It has the full API contract, every `data` shape, rendering guidance, limits, and real responses in `docs/examples/`.
-- **The web app already exists** in `frontend/` (plain HTML, CSS, and JavaScript, no build step), served by the API at `/`. `frontend/app.js` renders each section from `checker` and `data`; `frontend/charts.js` has the donut, bar, and column charts. Extend it rather than starting over unless the user asks for a framework.
+- **The web app already exists** in `frontend/` (plain HTML, CSS, and JavaScript, no build step), served by the API at `/`. `frontend/app.js` renders each section from `checker` and `data`; `frontend/charts.js` has the `h()` DOM helper, the `icon()` SVG icons, and the donut, bar, and column charts. Extend it rather than starting over unless the user asks for a framework.
+- **Design direction is minimalist editorial:** warm off-white and charcoal, Newsreader serif headings, Geist body, Geist Mono for labels and numbers, washed-out red/yellow/green/blue only for status. Colors come from the tokens at the top of `frontend/styles.css` (with a matching dark mode). Use `icon()` for icons, never emoji or symbol characters. Project skills in `.claude/skills/` (`minimalist-ui`, `redesign-existing-projects`) describe the rules.
 - **Working on the checking engine:** read [legit/README.md](legit/README.md).
 - **Querying the data directly:** read [docs/DATA_ACCESS.md](docs/DATA_ACCESS.md).
 

@@ -1,8 +1,8 @@
-# CrowdSolution — Is This Legit?
+# Trustify: Is This Legit?
 
-**PivotHacks 2026 Project**
+**PivotHacks 2026 Project** (repository: CrowdSolution)
 
-CrowdSolution is a real-time fact-checking and risk-rating engine built for university students living independently for the first time. Paste a rental listing, job offer, lease clause, bank message, or claim: it checks every detail against official data first, then the web, and returns a blunt risk verdict with verified sources, categorized findings, and an actionable checklist.
+Trustify is a real-time fact-checking and risk-rating engine built for university students living independently for the first time. Paste a rental listing, job offer, lease clause, bank message, or claim: it checks every detail against official data first, then the web, and returns a blunt risk verdict with verified sources, categorized findings, and an actionable checklist.
 
 ---
 
