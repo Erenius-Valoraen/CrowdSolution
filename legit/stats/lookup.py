@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from . import db
+from .. import db
 from .catalog import Metric
 from .models import Obs
 

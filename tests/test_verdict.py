@@ -1,9 +1,9 @@
 import unittest
 from datetime import date
 
-from factcheck import verdict
-from factcheck.catalog import Catalog
-from factcheck.models import Claim, Figure, Period, half_step
+from legit.stats import verdict
+from legit.stats.catalog import Catalog
+from legit.stats.models import Claim, Figure, Period, half_step
 
 CAT = Catalog()
 UNEMP = CAT.get("unemployment_rate")

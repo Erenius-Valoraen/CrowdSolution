@@ -1,9 +1,9 @@
 import unittest
 from datetime import date
 
-from factcheck.catalog import Catalog
-from factcheck.models import Period
-from factcheck.parse_rules import parse
+from legit.stats.catalog import Catalog
+from legit.stats.models import Period
+from legit.stats.parse_rules import parse
 
 CAT = Catalog()
 

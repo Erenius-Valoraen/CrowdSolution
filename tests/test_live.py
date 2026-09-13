@@ -2,13 +2,13 @@
 import unittest
 from datetime import date
 
-from factcheck import verdict
-from factcheck.catalog import Catalog
-from factcheck.engine import check
-from factcheck.parse_rules import parse
+from legit.stats import verdict
+from legit.stats.catalog import Catalog
+from legit.stats.engine import check
+from legit.stats.parse_rules import parse
 
 try:
-    from factcheck import db
+    from legit import db
 
     db.connection()
     LIVE = True

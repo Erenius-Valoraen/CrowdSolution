@@ -20,4 +20,15 @@ def load_dotenv(path: Path = REPO_ROOT / ".env") -> None:
 load_dotenv()
 
 SNOWFLAKE_CONNECTION = os.environ.get("CROWDSOLUTION_SF_CONNECTION", "crowdsolution")
-GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
+SEARCH_MODEL = os.environ.get("GROQ_SEARCH_MODEL", "openai/gpt-oss-120b")
+
+
+def _models(var: str, default: str) -> list[str]:
+    return [m.strip() for m in os.environ.get(var, default).split(",") if m.strip()]
+
+
+# Tried in order; the next model is used when one hits its rate limit.
+# Qwen first: fast (about 1 second) and cheap per call. GPT-OSS models are kept as backups.
+EXTRACT_MODELS = _models("GROQ_EXTRACT_MODELS", "qwen/qwen3.8-27b,qwen/qwen3.6-27b,openai/gpt-oss-120b,openai/gpt-oss-20b")
+SEARCH_MODELS = _models("GROQ_SEARCH_MODELS", f"{SEARCH_MODEL},openai/gpt-oss-20b")
