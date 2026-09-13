@@ -1,0 +1,13 @@
+-- What was the latest published figure for a series on a given date?
+-- This is the core "was it true when they said it?" lookup.
+SET series_id = 'LNS14000000.M_SA';
+SET said_on   = '2025-01-15';
+
+SELECT VARIABLE_NAME, DATE AS latest_period, VALUE, UNIT,
+       _EFFECTIVE_START_TIMESTAMP AS published
+FROM SNOWFLAKE_PUBLIC_DATA_FREE.PUBLIC_DATA_FREE.FINANCIAL_ECONOMIC_INDICATORS_TIMESERIES_PIT
+WHERE VARIABLE = $series_id
+  AND _EFFECTIVE_START_TIMESTAMP <= $said_on::TIMESTAMP_TZ
+  AND (_EFFECTIVE_END_TIMESTAMP IS NULL OR _EFFECTIVE_END_TIMESTAMP > $said_on::TIMESTAMP_TZ)
+ORDER BY DATE DESC
+LIMIT 1;

@@ -7,3 +7,11 @@ __pycache__/
 dist/
 build/
 .DS_Store
+
+# Secrets: Snowflake connection files and keys must never be committed
+.snowflake/
+connections.toml
+config.toml
+*.p8
+*.pem
+secrets*
