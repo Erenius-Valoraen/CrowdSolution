@@ -1,0 +1,17 @@
+[project]
+name = "trustify"
+version = "0.1.0"
+description = "Trustify checks listings, messages, posts, and YouTube videos against official data, student reports, and the web."
+requires-python = ">=3.12"
+# Runtime dependencies for the deployed web app. requirements.txt also has local tools (uvicorn, httpx for tests).
+dependencies = [
+    "fastapi>=0.110.0",
+    "pydantic>=2.0.0",
+    "snowflake-connector-python>=3.14",
+    "youtube-transcript-api>=1.2",
+    "rich>=13",
+]
+
+[tool.vercel]
+# The FastAPI app. Vercel runs it as one function and serves frontend/ (mounted at /static) from its CDN.
+entrypoint = "api.main:app"

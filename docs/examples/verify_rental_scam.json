@@ -1,0 +1,365 @@
+{
+  "request": {
+    "text": "Hey! Cozy 2BR apartment near UT Austin, only $650/month utilities included. I'm working abroad right now so I can't show it, but if you send the $500 deposit by Zelle today I'll mail you the keys. Lots of students are interested! - Greenview Property Mgmt, greenview.rentals@gmail.com"
+  },
+  "response": {
+    "id": "chk_e9d8bdece0",
+    "created_at": "2026-09-13T17:28:00.526631+00:00",
+    "overall": "HIGH RISK",
+    "overall_badge": {
+      "label": "HIGH RISK",
+      "color": "red",
+      "message": "High risk detected. Do not send money, deposits, or sensitive personal information."
+    },
+    "counts": {
+      "red_flag": 3,
+      "caution": 3,
+      "ok": 0,
+      "info": 0,
+      "unverified": 0,
+      "total": 6
+    },
+    "summary": "A rental listing for a 2-bedroom apartment near UT Austin with an unusually low price and pressure to pay a deposit via Zelle without viewing.",
+    "context": "housing",
+    "location": {
+      "city": "Austin",
+      "region": "Texas",
+      "country": "US",
+      "label": "Austin, Texas, US"
+    },
+    "action_checklist": [
+      "Never send a deposit, holding fee, or rent by Zelle, e-transfer, wire, or gift cards.",
+      "Demand an in-person walkthrough or live interactive video call. If they refuse, walk away.",
+      "Ask for their full legal name and check the property address on municipal rental licensing records.",
+      "Reverse-image search all listing photos to see if they are copied from legitimate real estate sites.",
+      "Remember: in Ontario and many jurisdictions, damage deposits are illegal\u2014only first/last month is permitted."
+    ],
+    "findings": [
+      {
+        "id": 1,
+        "kind": "price",
+        "status": "red_flag",
+        "status_label": "RED FLAG",
+        "color": "red",
+        "title": "Rent compared with local median",
+        "quote": "$650/month utilities included",
+        "summary": "$650/month is 34% of the 2024 median for 2-bedroom rentals in Austin ($1,899). Rent far below the local norm is one of the most common signs of a rental scam.",
+        "checker": "benchmark",
+        "evidence": [
+          {
+            "source": "US Census Bureau, American Community Survey 1-year median gross rent (via Snowflake Public Data)",
+            "detail": "Austin, 2-bedroom rentals, 2024: $1,899/month",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          }
+        ],
+        "data": {
+          "type": "rent",
+          "amount": 650.0,
+          "benchmark": 1899.0,
+          "ratio": 0.34228541337546076,
+          "place": "Austin",
+          "size": "2-bedroom rentals",
+          "year": 2024,
+          "unit": "usd_month",
+          "benchmark_label": "Typical 2-bedroom rentals in Austin (2024)"
+        }
+      },
+      {
+        "id": 3,
+        "kind": "pattern",
+        "status": "red_flag",
+        "status_label": "RED FLAG",
+        "color": "red",
+        "title": "Pay before you can verify",
+        "quote": "if you send the $500 deposit by Zelle today",
+        "summary": "Asking for money upfront before the apartment can be verified or viewed. Asking for a deposit or fee before you've seen the place, signed a lease, or started a job is how most rental and job scams take money.",
+        "checker": "patterns",
+        "evidence": [
+          {
+            "source": "FTC: Rental listing scams",
+            "detail": "Official consumer-protection guidance describing this warning sign",
+            "kind": "guidance",
+            "kind_label": "official guidance",
+            "url": "https://consumer.ftc.gov/articles/rental-listing-scams"
+          }
+        ],
+        "data": {
+          "type": "pattern",
+          "pattern": "upfront_payment",
+          "explanation": "Asking for a deposit or fee before you've seen the place, signed a lease, or started a job is how most rental and job scams take money.",
+          "why": "Asking for money upfront before the apartment can be verified or viewed."
+        }
+      },
+      {
+        "id": 4,
+        "kind": "pattern",
+        "status": "red_flag",
+        "status_label": "RED FLAG",
+        "color": "red",
+        "title": "Hard-to-reverse payment method",
+        "quote": "if you send the $500 deposit by Zelle today",
+        "summary": "Zelle is a hard-to-reverse payment method that offers little buyer protection. Wire transfers, gift cards, crypto, e-transfers, and instant payment apps are nearly impossible to get back once sent. Consumer-protection agencies in the US and Canada list requests to pay this way as a warning sign.",
+        "checker": "patterns",
+        "evidence": [
+          {
+            "source": "FTC: Rental listing scams",
+            "detail": "Official consumer-protection guidance describing this warning sign",
+            "kind": "guidance",
+            "kind_label": "official guidance",
+            "url": "https://consumer.ftc.gov/articles/rental-listing-scams"
+          }
+        ],
+        "data": {
+          "type": "pattern",
+          "pattern": "unusual_payment_method",
+          "explanation": "Wire transfers, gift cards, crypto, e-transfers, and instant payment apps are nearly impossible to get back once sent. Consumer-protection agencies in the US and Canada list requests to pay this way as a warning sign.",
+          "why": "Zelle is a hard-to-reverse payment method that offers little buyer protection."
+        }
+      },
+      {
+        "id": 2,
+        "kind": "entity",
+        "status": "caution",
+        "status_label": "CAUTION",
+        "color": "yellow",
+        "title": "Greenview Property Mgmt: identity check",
+        "quote": "Greenview Property Mgmt",
+        "summary": "It contacts you from a free personal email (gmail.com), not a company domain. Real employers and property companies usually use their own domain.",
+        "checker": "registry",
+        "evidence": [],
+        "data": {
+          "type": "company",
+          "registered_name": null,
+          "official_domains": [],
+          "claimed_domain": "gmail.com",
+          "domain_result": "free_email"
+        }
+      },
+      {
+        "id": 5,
+        "kind": "pattern",
+        "status": "caution",
+        "status_label": "CAUTION",
+        "color": "yellow",
+        "title": "You can't see it in person",
+        "quote": "I'm working abroad right now so I can't show it",
+        "summary": "The landlord claims they cannot show the apartment in person, preventing verification. Landlords who are abroad or can't show the unit are a common rental scam story.",
+        "checker": "patterns",
+        "evidence": [
+          {
+            "source": "FTC: Rental listing scams",
+            "detail": "Official consumer-protection guidance describing this warning sign",
+            "kind": "guidance",
+            "kind_label": "official guidance",
+            "url": "https://consumer.ftc.gov/articles/rental-listing-scams"
+          }
+        ],
+        "data": {
+          "type": "pattern",
+          "pattern": "cannot_view_in_person",
+          "explanation": "Landlords who are abroad or can't show the unit are a common rental scam story.",
+          "why": "The landlord claims they cannot show the apartment in person, preventing verification."
+        }
+      },
+      {
+        "id": 6,
+        "kind": "pattern",
+        "status": "caution",
+        "status_label": "CAUTION",
+        "color": "yellow",
+        "title": "Pressure to decide fast",
+        "quote": "Lots of students are interested!",
+        "summary": "Creating artificial scarcity and pressure to decide immediately. Scammers rush you so you don't have time to check. A real offer survives a day of verification.",
+        "checker": "patterns",
+        "evidence": [
+          {
+            "source": "FTC: Rental listing scams",
+            "detail": "Official consumer-protection guidance describing this warning sign",
+            "kind": "guidance",
+            "kind_label": "official guidance",
+            "url": "https://consumer.ftc.gov/articles/rental-listing-scams"
+          }
+        ],
+        "data": {
+          "type": "pattern",
+          "pattern": "urgency",
+          "explanation": "Scammers rush you so you don't have time to check. A real offer survives a day of verification.",
+          "why": "Creating artificial scarcity and pressure to decide immediately."
+        }
+      }
+    ],
+    "grouped_findings": {
+      "red_flags": [
+        {
+          "id": 1,
+          "kind": "price",
+          "status": "red_flag",
+          "status_label": "RED FLAG",
+          "color": "red",
+          "title": "Rent compared with local median",
+          "quote": "$650/month utilities included",
+          "summary": "$650/month is 34% of the 2024 median for 2-bedroom rentals in Austin ($1,899). Rent far below the local norm is one of the most common signs of a rental scam.",
+          "checker": "benchmark",
+          "evidence": [
+            {
+              "source": "US Census Bureau, American Community Survey 1-year median gross rent (via Snowflake Public Data)",
+              "detail": "Austin, 2-bedroom rentals, 2024: $1,899/month",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            }
+          ],
+          "data": {
+            "type": "rent",
+            "amount": 650.0,
+            "benchmark": 1899.0,
+            "ratio": 0.34228541337546076,
+            "place": "Austin",
+            "size": "2-bedroom rentals",
+            "year": 2024,
+            "unit": "usd_month",
+            "benchmark_label": "Typical 2-bedroom rentals in Austin (2024)"
+          }
+        },
+        {
+          "id": 3,
+          "kind": "pattern",
+          "status": "red_flag",
+          "status_label": "RED FLAG",
+          "color": "red",
+          "title": "Pay before you can verify",
+          "quote": "if you send the $500 deposit by Zelle today",
+          "summary": "Asking for money upfront before the apartment can be verified or viewed. Asking for a deposit or fee before you've seen the place, signed a lease, or started a job is how most rental and job scams take money.",
+          "checker": "patterns",
+          "evidence": [
+            {
+              "source": "FTC: Rental listing scams",
+              "detail": "Official consumer-protection guidance describing this warning sign",
+              "kind": "guidance",
+              "kind_label": "official guidance",
+              "url": "https://consumer.ftc.gov/articles/rental-listing-scams"
+            }
+          ],
+          "data": {
+            "type": "pattern",
+            "pattern": "upfront_payment",
+            "explanation": "Asking for a deposit or fee before you've seen the place, signed a lease, or started a job is how most rental and job scams take money.",
+            "why": "Asking for money upfront before the apartment can be verified or viewed."
+          }
+        },
+        {
+          "id": 4,
+          "kind": "pattern",
+          "status": "red_flag",
+          "status_label": "RED FLAG",
+          "color": "red",
+          "title": "Hard-to-reverse payment method",
+          "quote": "if you send the $500 deposit by Zelle today",
+          "summary": "Zelle is a hard-to-reverse payment method that offers little buyer protection. Wire transfers, gift cards, crypto, e-transfers, and instant payment apps are nearly impossible to get back once sent. Consumer-protection agencies in the US and Canada list requests to pay this way as a warning sign.",
+          "checker": "patterns",
+          "evidence": [
+            {
+              "source": "FTC: Rental listing scams",
+              "detail": "Official consumer-protection guidance describing this warning sign",
+              "kind": "guidance",
+              "kind_label": "official guidance",
+              "url": "https://consumer.ftc.gov/articles/rental-listing-scams"
+            }
+          ],
+          "data": {
+            "type": "pattern",
+            "pattern": "unusual_payment_method",
+            "explanation": "Wire transfers, gift cards, crypto, e-transfers, and instant payment apps are nearly impossible to get back once sent. Consumer-protection agencies in the US and Canada list requests to pay this way as a warning sign.",
+            "why": "Zelle is a hard-to-reverse payment method that offers little buyer protection."
+          }
+        }
+      ],
+      "cautions": [
+        {
+          "id": 2,
+          "kind": "entity",
+          "status": "caution",
+          "status_label": "CAUTION",
+          "color": "yellow",
+          "title": "Greenview Property Mgmt: identity check",
+          "quote": "Greenview Property Mgmt",
+          "summary": "It contacts you from a free personal email (gmail.com), not a company domain. Real employers and property companies usually use their own domain.",
+          "checker": "registry",
+          "evidence": [],
+          "data": {
+            "type": "company",
+            "registered_name": null,
+            "official_domains": [],
+            "claimed_domain": "gmail.com",
+            "domain_result": "free_email"
+          }
+        },
+        {
+          "id": 5,
+          "kind": "pattern",
+          "status": "caution",
+          "status_label": "CAUTION",
+          "color": "yellow",
+          "title": "You can't see it in person",
+          "quote": "I'm working abroad right now so I can't show it",
+          "summary": "The landlord claims they cannot show the apartment in person, preventing verification. Landlords who are abroad or can't show the unit are a common rental scam story.",
+          "checker": "patterns",
+          "evidence": [
+            {
+              "source": "FTC: Rental listing scams",
+              "detail": "Official consumer-protection guidance describing this warning sign",
+              "kind": "guidance",
+              "kind_label": "official guidance",
+              "url": "https://consumer.ftc.gov/articles/rental-listing-scams"
+            }
+          ],
+          "data": {
+            "type": "pattern",
+            "pattern": "cannot_view_in_person",
+            "explanation": "Landlords who are abroad or can't show the unit are a common rental scam story.",
+            "why": "The landlord claims they cannot show the apartment in person, preventing verification."
+          }
+        },
+        {
+          "id": 6,
+          "kind": "pattern",
+          "status": "caution",
+          "status_label": "CAUTION",
+          "color": "yellow",
+          "title": "Pressure to decide fast",
+          "quote": "Lots of students are interested!",
+          "summary": "Creating artificial scarcity and pressure to decide immediately. Scammers rush you so you don't have time to check. A real offer survives a day of verification.",
+          "checker": "patterns",
+          "evidence": [
+            {
+              "source": "FTC: Rental listing scams",
+              "detail": "Official consumer-protection guidance describing this warning sign",
+              "kind": "guidance",
+              "kind_label": "official guidance",
+              "url": "https://consumer.ftc.gov/articles/rental-listing-scams"
+            }
+          ],
+          "data": {
+            "type": "pattern",
+            "pattern": "urgency",
+            "explanation": "Scammers rush you so you don't have time to check. A real offer survives a day of verification.",
+            "why": "Creating artificial scarcity and pressure to decide immediately."
+          }
+        }
+      ],
+      "ok": [],
+      "context": [],
+      "unverified": []
+    },
+    "notes": [
+      "Web search hit Groq's rate limit; a single browser search can use more than a free-tier day of tokens. Try again in about 326 seconds."
+    ],
+    "raw_report": {
+      "parser": "snowflake cortex claude-haiku-4-5",
+      "said_on": "2026-09-13",
+      "items_count": 6
+    }
+  }
+}

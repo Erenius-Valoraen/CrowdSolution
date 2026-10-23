@@ -1,0 +1,120 @@
+"""
+Pydantic models for the Frontend JSON API.
+Defines the clean, structured contract sent to the frontend.
+"""
+from __future__ import annotations
+
+from typing import Any, Literal
+from pydantic import BaseModel, Field
+
+
+class VerifyRequest(BaseModel):
+    """Request payload from frontend."""
+    text: str = Field(..., description="The listing, job offer, message, or claim text to verify. A YouTube link on its own checks that video's transcript.", min_length=1)
+    seen_on: str | None = Field(None, description="Date seen (YYYY-MM-DD), default is today.")
+    offline: bool = Field(False, description="Web search is on by default. Set True to use only official data and scam patterns (faster, no web search tokens).")
+
+
+class EvidenceItem(BaseModel):
+    source: str
+    detail: str
+    kind: str
+    kind_label: str
+    url: str | None = None
+
+
+class FindingItem(BaseModel):
+    id: int
+    kind: str
+    status: Literal["red_flag", "caution", "unverified", "info", "ok"]
+    status_label: str
+    color: str
+    title: str
+    quote: str
+    summary: str
+    checker: str
+    evidence: list[EvidenceItem] = []
+    data: dict[str, Any] = {}
+    seconds: float | None = None      # YouTube checks only: where in the video this was said
+    timestamp: str | None = None
+
+
+class GroupedFindings(BaseModel):
+    red_flags: list[FindingItem] = []
+    cautions: list[FindingItem] = []
+    ok: list[FindingItem] = []
+    context: list[FindingItem] = []
+    unverified: list[FindingItem] = []
+
+
+class OverallBadge(BaseModel):
+    label: str
+    title: str | None = None   # what to show: fits questions and claims too, e.g. "Here's what the data says"
+    color: str
+    message: str
+
+
+class ExtractionSummary(BaseModel):
+    said_on: str
+    context: str
+    summary: str
+    location_label: str
+    parser: str
+
+
+class VerifyResponse(BaseModel):
+    """Clean JSON response tailored for frontend rendering."""
+    id: str
+    created_at: str
+    overall: str
+    overall_badge: OverallBadge
+    counts: dict[str, int]
+    summary: str
+    context: str
+    location: dict[str, str | None]
+    action_checklist: list[str]
+    findings: list[FindingItem]
+    grouped_findings: GroupedFindings
+    notes: list[str]
+    raw_report: dict[str, Any]
+    video: dict[str, Any] | None = None  # YouTube checks only: title, channel, coverage, and transcript lines
+    framing: str | None = None           # "safety" (listings, offers, messages), "question", or "claims" (posts, videos)
+
+
+class TranscribeResponse(BaseModel):
+    """Voice typing result: the words to put in the textbox."""
+    text: str
+    model: str
+
+
+class SpokenSummaryRequest(BaseModel):
+    """Optional: the report the page is showing, used when this server instance doesn't have the scan saved."""
+    report: dict[str, Any] | None = None
+
+
+class SpokenSummaryResponse(BaseModel):
+    """A short summary of a check's results, written to be read aloud."""
+    text: str
+    source: Literal["ai", "template"]
+
+
+class SpeakRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=1500, description="Text to read aloud, e.g. one sentence of a spoken summary.")
+
+
+class HistoryItem(BaseModel):
+    id: str
+    created_at: str
+    text_snippet: str
+    context: str
+    overall: str
+    overall_color: str
+    findings_count: int
+
+
+class ExampleItem(BaseModel):
+    id: str
+    title: str
+    category: str
+    text: str
+

@@ -1,0 +1,382 @@
+{
+  "request": {
+    "text": "Sublet available now! Private room in a 4 bedroom house by the University of Waterloo, 700 CAD a month. I'm currently in Vancouver so I can't show it, but e-transfer the first and last month to lock it in before someone else takes it."
+  },
+  "response": {
+    "id": "chk_6890a371c1",
+    "created_at": "2026-09-13T17:34:57.156703+00:00",
+    "overall": "HIGH RISK",
+    "overall_badge": {
+      "label": "HIGH RISK",
+      "color": "red",
+      "message": "High risk detected. Do not send money, deposits, or sensitive personal information."
+    },
+    "counts": {
+      "red_flag": 2,
+      "caution": 3,
+      "ok": 0,
+      "info": 1,
+      "unverified": 0,
+      "total": 6
+    },
+    "summary": "A sublet listing for a private room near University of Waterloo requiring upfront e-transfer payment without in-person viewing.",
+    "context": "housing",
+    "location": {
+      "city": "Waterloo",
+      "region": "Ontario",
+      "country": "CA",
+      "label": "Waterloo, Ontario, CA"
+    },
+    "action_checklist": [
+      "Never send a deposit, holding fee, or rent by Zelle, e-transfer, wire, or gift cards.",
+      "Demand an in-person walkthrough or live interactive video call. If they refuse, walk away.",
+      "Ask for their full legal name and check the property address on municipal rental licensing records.",
+      "Reverse-image search all listing photos to see if they are copied from legitimate real estate sites.",
+      "Remember: in Ontario and many jurisdictions, damage deposits are illegal\u2014only first/last month is permitted."
+    ],
+    "findings": [
+      {
+        "id": 2,
+        "kind": "pattern",
+        "status": "red_flag",
+        "status_label": "RED FLAG",
+        "color": "red",
+        "title": "Pay before you can verify",
+        "quote": "e-transfer the first and last month to lock it in before someone else takes it",
+        "summary": "Asking for payment before the student can verify the property or see it in person. Asking for a deposit or fee before you've seen the place, signed a lease, or started a job is how most rental and job scams take money.",
+        "checker": "patterns",
+        "evidence": [
+          {
+            "source": "Canadian Anti-Fraud Centre: Browse frauds",
+            "detail": "Official consumer-protection guidance describing this warning sign",
+            "kind": "guidance",
+            "kind_label": "official guidance",
+            "url": "https://antifraudcentre-centreantifraude.ca/scams-fraudes/index-eng.htm"
+          }
+        ],
+        "data": {
+          "type": "pattern",
+          "pattern": "upfront_payment",
+          "explanation": "Asking for a deposit or fee before you've seen the place, signed a lease, or started a job is how most rental and job scams take money.",
+          "why": "Asking for payment before the student can verify the property or see it in person."
+        }
+      },
+      {
+        "id": 5,
+        "kind": "pattern",
+        "status": "red_flag",
+        "status_label": "RED FLAG",
+        "color": "red",
+        "title": "Hard-to-reverse payment method",
+        "quote": "I'm currently in Vancouver so I can't show it, but e-transfer the first and last month to lock it in before someone else takes it.",
+        "summary": "Wire transfers, gift cards, crypto, e-transfers, and instant payment apps are nearly impossible to get back once sent. Consumer-protection agencies in the US and Canada list requests to pay this way as a warning sign.",
+        "checker": "patterns",
+        "evidence": [
+          {
+            "source": "Canadian Anti-Fraud Centre: Browse frauds",
+            "detail": "Official consumer-protection guidance describing this warning sign",
+            "kind": "guidance",
+            "kind_label": "official guidance",
+            "url": "https://antifraudcentre-centreantifraude.ca/scams-fraudes/index-eng.htm"
+          }
+        ],
+        "data": {
+          "type": "pattern",
+          "pattern": "unusual_payment_method",
+          "explanation": "Wire transfers, gift cards, crypto, e-transfers, and instant payment apps are nearly impossible to get back once sent. Consumer-protection agencies in the US and Canada list requests to pay this way as a warning sign.",
+          "why": ""
+        }
+      },
+      {
+        "id": 1,
+        "kind": "price",
+        "status": "caution",
+        "status_label": "CAUTION",
+        "color": "yellow",
+        "title": "Web check: 700 CAD a month",
+        "quote": "700 CAD a month",
+        "summary": "A typical 1\u2011bedroom in Waterloo averages around $1,900/month, with a range roughly $1,400\u2013$2,600. Paying $700/month is far below market rates.",
+        "checker": "web",
+        "evidence": [
+          {
+            "source": "Average Rent in Waterloo, ON",
+            "detail": "Web source cited by the search",
+            "kind": "web",
+            "kind_label": "web",
+            "url": "https://www.zumper.com/rent-research/waterloo-on"
+          }
+        ],
+        "data": {
+          "type": "web",
+          "verdict": "contradicted",
+          "question": "Is 700.0 (per month) a normal rent for a 1-bedroom in Waterloo, Ontario, CA? Give the typical range.",
+          "sources": [
+            {
+              "title": "Average Rent in Waterloo, ON",
+              "url": "https://www.zumper.com/rent-research/waterloo-on"
+            }
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "kind": "pattern",
+        "status": "caution",
+        "status_label": "CAUTION",
+        "color": "yellow",
+        "title": "You can't see it in person",
+        "quote": "I'm currently in Vancouver so I can't show it",
+        "summary": "The landlord cannot show the property in person, preventing verification. Landlords who are abroad or can't show the unit are a common rental scam story.",
+        "checker": "patterns",
+        "evidence": [
+          {
+            "source": "Canadian Anti-Fraud Centre: Browse frauds",
+            "detail": "Official consumer-protection guidance describing this warning sign",
+            "kind": "guidance",
+            "kind_label": "official guidance",
+            "url": "https://antifraudcentre-centreantifraude.ca/scams-fraudes/index-eng.htm"
+          }
+        ],
+        "data": {
+          "type": "pattern",
+          "pattern": "cannot_view_in_person",
+          "explanation": "Landlords who are abroad or can't show the unit are a common rental scam story.",
+          "why": "The landlord cannot show the property in person, preventing verification."
+        }
+      },
+      {
+        "id": 4,
+        "kind": "pattern",
+        "status": "caution",
+        "status_label": "CAUTION",
+        "color": "yellow",
+        "title": "Pressure to decide fast",
+        "quote": "lock it in before someone else takes it",
+        "summary": "Creating pressure to decide and pay quickly to avoid losing the opportunity. Scammers rush you so you don't have time to check. A real offer survives a day of verification.",
+        "checker": "patterns",
+        "evidence": [
+          {
+            "source": "Canadian Anti-Fraud Centre: Browse frauds",
+            "detail": "Official consumer-protection guidance describing this warning sign",
+            "kind": "guidance",
+            "kind_label": "official guidance",
+            "url": "https://antifraudcentre-centreantifraude.ca/scams-fraudes/index-eng.htm"
+          }
+        ],
+        "data": {
+          "type": "pattern",
+          "pattern": "urgency",
+          "explanation": "Scammers rush you so you don't have time to check. A real offer survives a day of verification.",
+          "why": "Creating pressure to decide and pay quickly to avoid losing the opportunity."
+        }
+      },
+      {
+        "id": 1,
+        "kind": "price",
+        "status": "info",
+        "status_label": "INFO",
+        "color": "blue",
+        "title": "Local rent trend",
+        "quote": "700 CAD a month",
+        "summary": "Rents in Ontario were +2.4% vs a year earlier as of May 2026. Our data has no rent levels for Canadian cities, so the listed price itself is checked on the web.",
+        "checker": "benchmark",
+        "evidence": [
+          {
+            "source": "Statistics Canada, Consumer Price Index: Rent (via Snowflake Public Data)",
+            "detail": "Ontario rent index 163.4 in May 2026, +2.4% year over year",
+            "kind": "official",
+            "kind_label": "official data",
+            "url": null
+          }
+        ],
+        "data": {
+          "type": "rent_trend",
+          "province": "Ontario",
+          "change_pct": 2.3809523809523947,
+          "month": "May 2026",
+          "amount": 700.0
+        }
+      }
+    ],
+    "grouped_findings": {
+      "red_flags": [
+        {
+          "id": 2,
+          "kind": "pattern",
+          "status": "red_flag",
+          "status_label": "RED FLAG",
+          "color": "red",
+          "title": "Pay before you can verify",
+          "quote": "e-transfer the first and last month to lock it in before someone else takes it",
+          "summary": "Asking for payment before the student can verify the property or see it in person. Asking for a deposit or fee before you've seen the place, signed a lease, or started a job is how most rental and job scams take money.",
+          "checker": "patterns",
+          "evidence": [
+            {
+              "source": "Canadian Anti-Fraud Centre: Browse frauds",
+              "detail": "Official consumer-protection guidance describing this warning sign",
+              "kind": "guidance",
+              "kind_label": "official guidance",
+              "url": "https://antifraudcentre-centreantifraude.ca/scams-fraudes/index-eng.htm"
+            }
+          ],
+          "data": {
+            "type": "pattern",
+            "pattern": "upfront_payment",
+            "explanation": "Asking for a deposit or fee before you've seen the place, signed a lease, or started a job is how most rental and job scams take money.",
+            "why": "Asking for payment before the student can verify the property or see it in person."
+          }
+        },
+        {
+          "id": 5,
+          "kind": "pattern",
+          "status": "red_flag",
+          "status_label": "RED FLAG",
+          "color": "red",
+          "title": "Hard-to-reverse payment method",
+          "quote": "I'm currently in Vancouver so I can't show it, but e-transfer the first and last month to lock it in before someone else takes it.",
+          "summary": "Wire transfers, gift cards, crypto, e-transfers, and instant payment apps are nearly impossible to get back once sent. Consumer-protection agencies in the US and Canada list requests to pay this way as a warning sign.",
+          "checker": "patterns",
+          "evidence": [
+            {
+              "source": "Canadian Anti-Fraud Centre: Browse frauds",
+              "detail": "Official consumer-protection guidance describing this warning sign",
+              "kind": "guidance",
+              "kind_label": "official guidance",
+              "url": "https://antifraudcentre-centreantifraude.ca/scams-fraudes/index-eng.htm"
+            }
+          ],
+          "data": {
+            "type": "pattern",
+            "pattern": "unusual_payment_method",
+            "explanation": "Wire transfers, gift cards, crypto, e-transfers, and instant payment apps are nearly impossible to get back once sent. Consumer-protection agencies in the US and Canada list requests to pay this way as a warning sign.",
+            "why": ""
+          }
+        }
+      ],
+      "cautions": [
+        {
+          "id": 1,
+          "kind": "price",
+          "status": "caution",
+          "status_label": "CAUTION",
+          "color": "yellow",
+          "title": "Web check: 700 CAD a month",
+          "quote": "700 CAD a month",
+          "summary": "A typical 1\u2011bedroom in Waterloo averages around $1,900/month, with a range roughly $1,400\u2013$2,600. Paying $700/month is far below market rates.",
+          "checker": "web",
+          "evidence": [
+            {
+              "source": "Average Rent in Waterloo, ON",
+              "detail": "Web source cited by the search",
+              "kind": "web",
+              "kind_label": "web",
+              "url": "https://www.zumper.com/rent-research/waterloo-on"
+            }
+          ],
+          "data": {
+            "type": "web",
+            "verdict": "contradicted",
+            "question": "Is 700.0 (per month) a normal rent for a 1-bedroom in Waterloo, Ontario, CA? Give the typical range.",
+            "sources": [
+              {
+                "title": "Average Rent in Waterloo, ON",
+                "url": "https://www.zumper.com/rent-research/waterloo-on"
+              }
+            ]
+          }
+        },
+        {
+          "id": 3,
+          "kind": "pattern",
+          "status": "caution",
+          "status_label": "CAUTION",
+          "color": "yellow",
+          "title": "You can't see it in person",
+          "quote": "I'm currently in Vancouver so I can't show it",
+          "summary": "The landlord cannot show the property in person, preventing verification. Landlords who are abroad or can't show the unit are a common rental scam story.",
+          "checker": "patterns",
+          "evidence": [
+            {
+              "source": "Canadian Anti-Fraud Centre: Browse frauds",
+              "detail": "Official consumer-protection guidance describing this warning sign",
+              "kind": "guidance",
+              "kind_label": "official guidance",
+              "url": "https://antifraudcentre-centreantifraude.ca/scams-fraudes/index-eng.htm"
+            }
+          ],
+          "data": {
+            "type": "pattern",
+            "pattern": "cannot_view_in_person",
+            "explanation": "Landlords who are abroad or can't show the unit are a common rental scam story.",
+            "why": "The landlord cannot show the property in person, preventing verification."
+          }
+        },
+        {
+          "id": 4,
+          "kind": "pattern",
+          "status": "caution",
+          "status_label": "CAUTION",
+          "color": "yellow",
+          "title": "Pressure to decide fast",
+          "quote": "lock it in before someone else takes it",
+          "summary": "Creating pressure to decide and pay quickly to avoid losing the opportunity. Scammers rush you so you don't have time to check. A real offer survives a day of verification.",
+          "checker": "patterns",
+          "evidence": [
+            {
+              "source": "Canadian Anti-Fraud Centre: Browse frauds",
+              "detail": "Official consumer-protection guidance describing this warning sign",
+              "kind": "guidance",
+              "kind_label": "official guidance",
+              "url": "https://antifraudcentre-centreantifraude.ca/scams-fraudes/index-eng.htm"
+            }
+          ],
+          "data": {
+            "type": "pattern",
+            "pattern": "urgency",
+            "explanation": "Scammers rush you so you don't have time to check. A real offer survives a day of verification.",
+            "why": "Creating pressure to decide and pay quickly to avoid losing the opportunity."
+          }
+        }
+      ],
+      "ok": [],
+      "context": [
+        {
+          "id": 1,
+          "kind": "price",
+          "status": "info",
+          "status_label": "INFO",
+          "color": "blue",
+          "title": "Local rent trend",
+          "quote": "700 CAD a month",
+          "summary": "Rents in Ontario were +2.4% vs a year earlier as of May 2026. Our data has no rent levels for Canadian cities, so the listed price itself is checked on the web.",
+          "checker": "benchmark",
+          "evidence": [
+            {
+              "source": "Statistics Canada, Consumer Price Index: Rent (via Snowflake Public Data)",
+              "detail": "Ontario rent index 163.4 in May 2026, +2.4% year over year",
+              "kind": "official",
+              "kind_label": "official data",
+              "url": null
+            }
+          ],
+          "data": {
+            "type": "rent_trend",
+            "province": "Ontario",
+            "change_pct": 2.3809523809523947,
+            "month": "May 2026",
+            "amount": 700.0
+          }
+        }
+      ],
+      "unverified": []
+    },
+    "notes": [
+      "Keyword rules added 1 item(s) the AI extraction missed."
+    ],
+    "raw_report": {
+      "parser": "snowflake cortex claude-haiku-4-5",
+      "said_on": "2026-09-13",
+      "items_count": 5
+    }
+  }
+}

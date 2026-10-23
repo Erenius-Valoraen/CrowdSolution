@@ -1,0 +1,2 @@
+"""CrowdSolution Frontend JSON API."""
+

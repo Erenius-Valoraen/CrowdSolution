@@ -9,3 +9,19 @@ node_modules/
 *.pem
 *.csv
 .DS_Store
+
+.env.*
+*.pyc
+dist/
+build/
+
+# Secrets: Snowflake connection files and keys must never be committed
+.snowflake/
+connections.toml
+config.toml
+*.p8
+secrets*
+*.db
+*.sqlite
+.vercel
+.env*
