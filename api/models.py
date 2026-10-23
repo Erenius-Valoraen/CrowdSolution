@@ -49,6 +49,7 @@ class GroupedFindings(BaseModel):
 
 class OverallBadge(BaseModel):
     label: str
+    title: str | None = None   # what to show: fits questions and claims too, e.g. "Here's what the data says"
     color: str
     message: str
 
@@ -77,6 +78,7 @@ class VerifyResponse(BaseModel):
     notes: list[str]
     raw_report: dict[str, Any]
     video: dict[str, Any] | None = None  # YouTube checks only: title, channel, coverage, and transcript lines
+    framing: str | None = None           # "safety" (listings, offers, messages), "question", or "claims" (posts, videos)
 
 
 class TranscribeResponse(BaseModel):

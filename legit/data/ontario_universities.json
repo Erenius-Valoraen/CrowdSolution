@@ -1,0 +1,48 @@
+{
+  "_about": "Official figures for Ontario universities, which the US College Scorecard doesn't cover. Copied by hand from the sources below on 2026-09-13; update them when new reports are published.",
+  "currency": "CAD",
+  "notes": [
+    "Earnings, related-field employment, graduation, and experiential learning use the same Ontario government definitions for both schools (2020-2025 Strategic Mandate Agreement metrics, 2023-24 results).",
+    "Tuition isn't measured the same way: Waterloo's computer science figure is for September 2026 entry and includes incidental fees; Toronto's is 2025-26 tuition only. Toronto computer science students pay the general Arts & Science fee in first year ($6,100 domestic), then $11,420 from second year."
+  ],
+  "sources": {
+    "sma_waterloo": {"title": "Government of Ontario: 2020-2025 Strategic Mandate Agreement, University of Waterloo", "url": "https://www.ontario.ca/page/2020-2025-strategic-mandate-agreement-university-waterloo"},
+    "sma_toronto": {"title": "Government of Ontario: 2020-2025 Strategic Mandate Agreement, University of Toronto", "url": "https://www.ontario.ca/page/2020-2025-strategic-mandate-agreement-university-toronto"},
+    "waterloo_tuition": {"title": "University of Waterloo: First-year tuition fees", "url": "https://uwaterloo.ca/future-students/financing/tuition"},
+    "waterloo_facts": {"title": "University of Waterloo: Quick facts", "url": "https://uwaterloo.ca/about/facts"},
+    "toronto_fees": {"title": "University of Toronto: Tuition Fee Schedules for Publicly-Funded Programs 2025-26", "url": "https://planningandbudget.utoronto.ca/wp-content/uploads/2025/04/2025-26-Tuition-Fee-Report.pdf"},
+    "toronto_facts": {"title": "University of Toronto: Quick facts", "url": "https://www.utoronto.ca/about-u-of-t/quick-facts"}
+  },
+  "schools": {
+    "University of Waterloo": {
+      "aliases": ["university of waterloo", "uwaterloo", "waterloo", "uw", "u waterloo"],
+      "city": "Waterloo",
+      "province": "ON",
+      "metrics": {
+        "earnings_2yr_median": {"value": 69690, "period": "2023-24", "source": "sma_waterloo"},
+        "employment_related_rate": {"value": 0.9638, "period": "2023-24", "source": "sma_waterloo"},
+        "graduation_rate": {"value": 0.8405, "period": "2023-24", "source": "sma_waterloo"},
+        "experiential_learning": {"value": 0.769, "period": "2023-24", "source": "sma_waterloo"},
+        "tuition_domestic": {"value": 16000, "period": "Computer Science, first year, Sept 2026 entry, Ontario students, incl. incidental fees", "source": "waterloo_tuition"},
+        "tuition_international": {"value": 73000, "period": "Computer Science, first year, Sept 2026 entry, incl. incidental fees", "source": "waterloo_tuition"},
+        "total_students": {"value": 41000, "period": "2025 (41,000+ full- and part-time)", "source": "waterloo_facts"},
+        "coop_share": {"value": 0.77, "period": "2025", "source": "waterloo_facts"}
+      }
+    },
+    "University of Toronto": {
+      "aliases": ["university of toronto", "uoft", "u of t", "utoronto", "toronto", "u toronto"],
+      "city": "Toronto",
+      "province": "ON",
+      "metrics": {
+        "earnings_2yr_median": {"value": 61877, "period": "2023-24", "source": "sma_toronto"},
+        "employment_related_rate": {"value": 0.8908, "period": "2023-24", "source": "sma_toronto"},
+        "graduation_rate": {"value": 0.8033, "period": "2023-24", "source": "sma_toronto"},
+        "experiential_learning": {"value": 0.6557, "period": "2023-24", "source": "sma_toronto"},
+        "tuition_domestic": {"value": 6100, "period": "Computer Science (Arts & Science, St. George), first year, 2025-26, Ontario residents; $11,420 from year 2", "source": "toronto_fees"},
+        "tuition_international": {"value": 63570, "period": "Computer Science (Arts & Science, St. George), 2025-26 entry", "source": "toronto_fees"},
+        "total_students": {"value": 103140, "period": "Fall 2025-26", "source": "toronto_facts"},
+        "undergrads": {"value": 81412, "period": "Fall 2025-26", "source": "toronto_facts"}
+      }
+    }
+  }
+}

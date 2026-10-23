@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import re
+from functools import lru_cache
+from pathlib import Path
 
 from .. import db
 from ..models import Evidence, Extraction, Finding, Item
@@ -12,6 +14,28 @@ from ..stats.models import half_step
 SRC_SCORECARD = "US Department of Education, College Scorecard, most recent cohorts (via Snowflake Marketplace)"
 SRC_OPENALEX = "OpenAlex research catalog (via Snowflake Public Data)"
 BENCH = "CROWDSOLUTION.BENCHMARKS"
+# Hand-curated official figures for Ontario universities (Scorecard is US-only). See the file for sources and dates.
+CURATED_PATH = Path(__file__).resolve().parent.parent / "data" / "ontario_universities.json"
+CURATED_LABELS = {
+    "earnings_2yr_median": ("Median graduate earnings 2 years after graduating", "usd"),
+    "employment_related_rate": ("Graduates employed in a related field", "percent"),
+    "graduation_rate": ("Graduation rate", "percent"),
+    "experiential_learning": ("Students with work-integrated learning", "percent"),
+    "tuition_domestic": ("First-year computer science tuition, domestic", "usd"),
+    "tuition_international": ("First-year computer science tuition, international", "usd"),
+    "total_students": ("Total students", "count"),
+    "undergrads": ("Undergraduate students", "count"),
+    "coop_share": ("Students in co-op", "percent"),
+}
+# What a claim's metric maps to in the curated data.
+CURATED_CLAIM_METRIC = {
+    "median_earnings_6yr": "earnings_2yr_median", "median_earnings_10yr": "earnings_2yr_median",
+    "program_earnings_1yr": "earnings_2yr_median", "program_earnings_4yr": "earnings_2yr_median",
+    "program_earnings_5yr": "earnings_2yr_median", "graduation_rate": "graduation_rate",
+    "tuition_in_state": "tuition_domestic", "net_price": "tuition_domestic", "cost_of_attendance": "tuition_domestic",
+    "tuition_out_of_state": "tuition_international", "undergrad_enrollment": "total_students",
+}
+EARNINGS_WORDS = re.compile(r"\b(earn\w*|salar\w*|make|makes|paid|pay|income)\b", re.I)
 
 # metric -> (column, unit, label). Rates are stored as fractions.
 SCHOOL_METRICS = {
@@ -258,6 +282,85 @@ def _claim(item: Item, label: str, unit: str, metric: str, claimed: str, officia
             "official": official, "result": status}
 
 
+# --- Curated Ontario figures ---
+
+@lru_cache(maxsize=1)
+def curated_data() -> dict:
+    return json.loads(CURATED_PATH.read_text(encoding="utf-8"))
+
+
+def curated_school(name: str | None) -> tuple[str, dict] | None:
+    """(official name, entry) when a name or alias matches a curated school exactly, e.g. "UofT" or "uwaterloo"."""
+    key = normalize(name)
+    if not key:
+        return None
+    for official, entry in curated_data()["schools"].items():
+        if key in {normalize(a) for a in entry.get("aliases", [])} | {normalize(official)}:
+            return official, entry
+    return None
+
+
+def _curated_row(official: str, entry: dict) -> dict:
+    row = {"name": official, "city": entry.get("city"), "state": entry.get("province"), "country": "CA"}
+    row.update({key: metric["value"] for key, metric in entry["metrics"].items()})
+    if research := find_research(official):
+        row.update(research_summary(research))
+    return row
+
+
+def _curated_evidence(official: str, entry: dict) -> list[Evidence]:
+    sources = curated_data().get("sources", {})
+    out = []
+    for key, metric in entry["metrics"].items():
+        label, unit = CURATED_LABELS.get(key, (key, "count"))
+        source = sources.get(metric.get("source"), {})
+        out.append(Evidence(source.get("title", "Official university data"),
+                            f"{official}: {label.lower()} {display(metric['value'], unit)} ({metric.get('period', '')})",
+                            "official", source.get("url")))
+    return out
+
+
+def _curated_comparison(item: Item, mine: tuple[str, dict], theirs: tuple[str, dict] | None, other: str | None,
+                        metric: str) -> Finding:
+    """Side-by-side official figures for curated schools, with a direct answer when the text compares them."""
+    rows = [_curated_row(*mine)]
+    evidence = _curated_evidence(*mine)
+    if theirs and theirs[0] != mine[0]:
+        rows.append(_curated_row(*theirs))
+        evidence += _curated_evidence(*theirs)
+    elif other and (research := find_research(other)):
+        rows.append(research_only_summary(research))
+    a = rows[0]
+    b = rows[1] if len(rows) > 1 and rows[1].get("earnings_2yr_median") is not None else None
+
+    if b:
+        sentences = [
+            f"{a['name']} graduates earned a median {display(a.get('earnings_2yr_median'), 'usd')} two years after graduating, "
+            f"compared with {display(b.get('earnings_2yr_median'), 'usd')} at {b['name']}.",
+            f"{display(a.get('employment_related_rate'), 'percent')} of {a['name']} graduates were employed in a related field, "
+            f"versus {display(b.get('employment_related_rate'), 'percent')} at {b['name']} (Government of Ontario, 2023-24).",
+        ]
+    else:
+        sentences = [f"{a['name']} graduates earned a median {display(a.get('earnings_2yr_median'), 'usd')} two years after "
+                     f"graduating, and {display(a.get('employment_related_rate'), 'percent')} were employed in a related field "
+                     "(Government of Ontario, 2023-24)."]
+
+    status, claim = "info", None
+    direction = item.data.get("direction") if item.data.get("direction") in ("higher", "lower") else None
+    key = CURATED_CLAIM_METRIC.get(metric) or ("earnings_2yr_median" if EARNINGS_WORDS.search(item.text or "") else None)
+    if b and direction and key and a.get(key) is not None and b.get(key) is not None:
+        label, unit = CURATED_LABELS[key]
+        holds = compare_direction(float(a[key]), float(b[key]), direction, unit)
+        status = "ok" if holds else "caution"
+        claim = _claim(item, label, unit, key, f"{direction} than {b['name']}", f"{display(a[key], unit)} vs {display(b[key], unit)}", status)
+        sentences.insert(0, f"{'Yes' if holds else 'No'}, going by official Ontario data.")
+
+    title = f"{a['name']} vs {b['name']}: official Ontario data" if b else f"{a['name']}: official Ontario data"
+    data = {"type": "college", "schools": rows, "programs": [], "claim": claim, "opinion": claim is None and metric == "general",
+            "curated": True, "currency": curated_data().get("currency"), "notes": curated_data().get("notes", [])}
+    return Finding(item, status, title, " ".join(sentences), "college", evidence, data=data)
+
+
 # --- Checker ---
 
 def check(item: Item, ext: Extraction) -> Finding | None:
@@ -291,6 +394,10 @@ def check(item: Item, ext: Extraction) -> Finding | None:
         evidence.append(Evidence(SRC_OPENALEX, research_facts(research)))
 
     if school is None:
+        mine = curated_school(d.get("school")) or curated_school(name)
+        if mine:
+            theirs = curated_school(d.get("compare_to")) or curated_school(other)
+            return _curated_comparison(item, mine, theirs, other, metric)
         if research is None:
             return None
         data["schools"].append(research_only_summary(research))

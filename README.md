@@ -6,6 +6,19 @@ Trustify is a real-time fact-checking and risk-rating engine built for universit
 
 ---
 
+## Trustify for YouTube (Chrome extension)
+
+The [`extension/`](extension/) folder fact-checks YouTube videos about universities, jobs, housing and rent, and government policy, right under the video.
+
+- **Results where you're already looking.** A panel styled like YouTube (light and dark) sits just above the comments. Each claim shows its verdict, what the video said next to what the official data says, and a timestamp button that jumps the video to that moment.
+- **Only checks videos that matter.** The extension reads the watch page's player data (title, tags, description, category). It skips categories like Gaming and Music, then scores topic matches weighted by where they appear (title 4×, tags 2×, description 1×).
+- **Built for YouTube's single-page navigation.** Each video change starts a fresh check and cancels the one in flight. Results are cached for 24 hours, so reopening a video is instant.
+- **Judged by what was known at the time.** The backend reads the transcript, extracts claims, and checks statistics against Snowflake's point-in-time tables *as of the video's upload date*, so a number that was right when the video went up isn't marked wrong after a later revision.
+
+Install: open `chrome://extensions`, turn on Developer mode, click **Load unpacked** and pick `extension/`. See [extension/README.md](extension/README.md).
+
+---
+
 ## The Problem & The User
 
 - **The Problem:** Students constantly struggle to decide which online claims, recommendations, rental listings, job offers, or financial messages to trust.

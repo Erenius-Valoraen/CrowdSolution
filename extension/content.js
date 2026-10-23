@@ -247,6 +247,15 @@ function comparison(f) {
     ]);
   }
 
+  if (d.curated && (d.schools || []).length >= 2) {
+    const withEarnings = d.schools.filter((s) => s.earnings_2yr_median != null);
+    if (withEarnings.length >= 2) {
+      return bars(withEarnings.map((s, i) => ({
+        label: s.name, value: s.earnings_2yr_median, display: formatValue(s.earnings_2yr_median, d.currency || 'usd'), tone: i === 0 ? 'blue' : 'gray',
+      })), `Median graduate earnings 2 years after graduating (${d.currency || 'USD'}), Government of Ontario`);
+    }
+  }
+
   if (d.claim?.claimed || d.claim?.official) return pair([['Said', d.claim.claimed], [d.claim.label ? `Official (${d.claim.label})` : 'Official', d.claim.official, true]]);
   if (d.claimed || d.found) return pair([['Said', d.claimed], [`Sources say${d.as_of ? ` (${d.as_of})` : ''}`, d.found, true]]);
   return null;
@@ -313,7 +322,9 @@ function row(f) {
 }
 
 function renderResult(card, data) {
-  const [label, tone] = VERDICT[data.overall] || VERDICT["COULDN'T VERIFY"];
+  const [baseLabel, baseTone] = VERDICT[data.overall] || VERDICT["COULDN'T VERIFY"];
+  const label = data.overall_badge?.title || baseLabel;  // e.g. "Claims check out" rather than "No red flags" for videos
+  const tone = { green: 'green', yellow: 'yellow', red: 'red', blue: 'blue', gray: 'gray' }[data.overall_badge?.color] || baseTone;
   const counts = data.counts || {};
   const findings = [...(data.findings || [])].sort((a, b) =>
     SEVERITY[b.status] - SEVERITY[a.status] || (a.seconds ?? 1e9) - (b.seconds ?? 1e9));

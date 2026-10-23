@@ -178,8 +178,18 @@ function section(id, title, subtitle, ...body) {
 
 // ---------- sections ----------
 
+/** Verdict wording and tone. Questions and claims get titles like "Here's what the data says" instead of "No red flags". */
+function verdictMeta(data) {
+  const base = OVERALL[data.overall] || OVERALL["COULDN'T VERIFY"];
+  const title = data.overall_badge?.title || base.title;
+  if (data.framing === 'question' && data.overall !== 'HIGH RISK') {
+    return { tone: data.overall_badge?.color === 'gray' ? 'tone-gray' : 'tone-blue', icon: 'data', title };
+  }
+  return { ...base, title };
+}
+
 function hero(data, text, speakerEl) {
-  const meta = OVERALL[data.overall] || OVERALL["COULDN'T VERIFY"];
+  const meta = verdictMeta(data);
   const counts = data.counts || {};
   const segments = ['red_flag', 'caution', 'ok', 'info', 'unverified'].map((k) => ({ label: STATUS[k].label, value: counts[k] || 0, color: STATUS[k].color }));
   const evidence = (data.findings || []).flatMap((f) => f.evidence || []);
@@ -372,6 +382,13 @@ function pricesSection(fs) {
 }
 
 const SCHOOL_METRICS = [
+  { key: 'earnings_2yr_median', label: 'Median graduate earnings, 2 years after graduating', fmt: fmt.money },
+  { key: 'employment_related_rate', label: 'Graduates employed in a related field', fmt: fmt.pct },
+  { key: 'experiential_learning', label: 'Students with work-integrated learning', fmt: fmt.pct },
+  { key: 'coop_share', label: 'Students in co-op', fmt: fmt.pct },
+  { key: 'tuition_domestic', label: 'First-year CS tuition, domestic students', fmt: fmt.money },
+  { key: 'tuition_international', label: 'First-year CS tuition, international students', fmt: fmt.money },
+  { key: 'total_students', label: 'Total students', fmt: fmt.num },
   { key: 'admission_rate', label: 'Admission rate', fmt: fmt.pct },
   { key: 'graduation_rate', label: 'Graduation rate', fmt: fmt.pct },
   { key: 'tuition_in_state', label: 'In-state tuition', fmt: fmt.money },
@@ -387,6 +404,7 @@ const CLAIM_KEY = {
   admission_rate: 'admission_rate', tuition_in_state: 'tuition_in_state', tuition_out_of_state: 'tuition_out_of_state',
   net_price: 'net_price', graduation_rate: 'graduation_rate', median_earnings_10yr: 'earnings_10yr',
   median_debt: 'median_debt', undergrad_enrollment: 'undergrads',
+  earnings_2yr_median: 'earnings_2yr_median', employment_related_rate: 'employment_related_rate', tuition_domestic: 'tuition_domestic',
 };
 
 function schoolsSection(fs) {
@@ -405,8 +423,17 @@ function schoolsSection(fs) {
     if (d.claim && CLAIM_KEY[d.claim.metric]) claimed.set(CLAIM_KEY[d.claim.metric], d.claim.result);
   }
   const list = [...schools.values()];
-  const metrics = SCHOOL_METRICS.filter((m) => list.some((s) => s[m.key] != null));
+  const curated = fs.find((f) => f.data?.curated);
+  const currency = curated?.data?.currency;
+  const metrics = SCHOOL_METRICS.filter((m) => list.some((s) => s[m.key] != null))
+    .map((m) => (m.fmt === fmt.money && currency && currency !== 'USD' ? { ...m, label: `${m.label} (${currency})` } : m));
   const parts = [];
+  if (curated) {
+    parts.push(h('div', { class: 'answer' },
+      h('div', { class: 'answer-kicker' }, 'The short answer'),
+      h('p', {}, curated.summary),
+      (curated.data.notes || []).length ? h('ul', { class: 'answer-notes' }, curated.data.notes.map((n) => h('li', {}, n))) : null));
+  }
 
   if (list.length >= 2) {
     parts.push(h('div', { class: 'chart-grid' }, metrics.map((m) => h('div', { class: `mini-chart${claimed.has(m.key) ? ` is-claimed ${STATUS[claimed.get(m.key)]?.tone}` : ''}` },
@@ -462,7 +489,10 @@ function schoolsSection(fs) {
   const unique = allEvidence.filter((e) => { const k = `${e.source}|${e.detail}`; if (seen.has(k)) return false; seen.add(k); return true; });
   parts.push(evidenceList(unique.length ? unique : webSources));
 
-  return section('schools', 'Schools and majors', 'US Department of Education College Scorecard and OpenAlex research data', parts);
+  const subtitle = curated
+    ? 'Government of Ontario Strategic Mandate Agreement results, official university tuition schedules and facts, and OpenAlex research data'
+    : 'US Department of Education College Scorecard and OpenAlex research data';
+  return section('schools', 'Schools and majors', subtitle, parts);
 }
 
 function statsSection(fs) {

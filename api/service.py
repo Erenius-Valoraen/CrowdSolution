@@ -122,7 +122,11 @@ def clean_spoken(text: str, limit: int = SPOKEN_MAX_CHARS) -> str:
 def template_spoken_summary(payload: dict[str, Any]) -> str:
     """Plain spoken summary built from the results, used when no AI model is available."""
     counts = payload.get("counts") or {}
-    parts = [SPOKEN_OPENERS.get(payload.get("overall"), "Here's what I found.")]
+    badge_title = (payload.get("overall_badge") or {}).get("title")
+    opener = SPOKEN_OPENERS.get(payload.get("overall"), "Here's what I found.")
+    if payload.get("framing") in ("question", "claims") and badge_title:
+        opener = f"{badge_title}."
+    parts = [opener]
     tally = [f"{n} {one if n == 1 else many}" for n, one, many in (
         (counts.get("red_flag", 0), "red flag", "red flags"),
         (counts.get("caution", 0), "thing to be careful about", "things to be careful about"),
@@ -156,7 +160,12 @@ def template_spoken_summary(payload: dict[str, Any]) -> str:
 
 def _spoken_facts(payload: dict[str, Any]) -> str:
     counts = payload.get("counts") or {}
-    lines = [f"Verdict: {payload.get('overall')}", f"What it is: {payload.get('summary')}"]
+    badge = payload.get("overall_badge") or {}
+    lines = [f"Verdict: {badge.get('title') or payload.get('overall')}", f"What it is: {payload.get('summary')}"]
+    if payload.get("framing") == "question":
+        lines.append("The student asked a question. Answer it directly with the numbers; don't talk about red flags or scams.")
+    elif payload.get("framing") == "claims":
+        lines.append("These are claims from a post or video. Say which ones hold up and which don't; don't talk about scams.")
     video = payload.get("video")
     if video:
         lines.append(f"Source: YouTube video \"{video.get('title')}\" by {video.get('channel')}, published {video.get('upload_date')}")
@@ -185,6 +194,44 @@ def spoken_summary(payload: dict[str, Any]) -> tuple[str, str]:
         except llm.LLMError:
             pass
     return template_spoken_summary(payload), "template"
+
+
+VERDICT_TITLES = {
+    "HIGH RISK": "High risk",
+    "BE CAREFUL": "Be careful",
+    "NO RED FLAGS FOUND": "No red flags found",
+    "COULDN'T VERIFY": "Couldn't verify",
+    "NOTHING TO CHECK": "Nothing to check",
+}
+# "No red flags" only makes sense for listings, offers, and messages. Questions and claims get their own wording.
+FRAMED_VERDICTS = {
+    ("question", "NO RED FLAGS FOUND"): ("Here's what the data says", "blue",
+                                         "We found official data and sources for your question. See the comparisons below."),
+    ("question", "BE CAREFUL"): ("Here's what the data says", "blue",
+                                 "Part of what the question assumes doesn't match the data. See the comparisons below."),
+    ("question", "COULDN'T VERIFY"): ("Not enough data to answer", "gray",
+                                      "We couldn't find reliable data for this question. Try naming a specific school, job, price, or statistic."),
+    ("question", "NOTHING TO CHECK"): ("Nothing to look up", "gray",
+                                       "Try asking about a specific school, major, job, price, or statistic."),
+    ("claims", "NO RED FLAGS FOUND"): ("Claims check out", "green",
+                                       "The claims we checked match official data and web sources."),
+    ("claims", "BE CAREFUL"): ("Some claims don't hold up", "yellow",
+                               "Some claims don't match official data or web sources. See which ones below."),
+    ("claims", "COULDN'T VERIFY"): ("Couldn't verify the claims", "gray",
+                                    "We couldn't confirm these claims against official data or the web. Check them yourself."),
+}
+QUESTION_START = re.compile(r"^\s*(do|does|did|is|are|was|were|can|could|should|will|would|how|what|which|who|why|when|where)\b", re.I)
+SAFETY_CHECKERS = {"patterns", "registry", "reputation", "community", "benchmark"}
+
+
+def framing_of(text: str, context: str, findings: list[Finding], is_video: bool) -> str:
+    """"safety" for listings, offers, and messages; "question" for a question; "claims" for posts and videos."""
+    if not is_video and (context in ("housing", "job", "finance") or any(f.checker in SAFETY_CHECKERS for f in findings)):
+        return "safety"
+    stripped = (text or "").strip()
+    if not is_video and (stripped.endswith("?") or (QUESTION_START.match(stripped) and len(stripped) < 300)):
+        return "question"
+    return "claims"
 
 
 def generate_checklist(context: str, overall: str, findings: list[Finding], is_video: bool = False) -> list[str]:
@@ -322,6 +369,9 @@ def build_payload(rep: Report, text: str, offline: bool = False, *, video: dict[
     ext = rep.extraction
     overall = rep.overall
     meta = OVERALL_META.get(overall, {"color": "gray", "message": "Verify details independently."})
+    framing = framing_of(text, ext.context, rep.findings, video is not None)
+    title, badge_color, message = FRAMED_VERDICTS.get((framing, overall),
+                                                (VERDICT_TITLES.get(overall, overall.title()), meta["color"], meta["message"]))
 
     # Counts
     counts = {
@@ -404,9 +454,11 @@ def build_payload(rep: Report, text: str, offline: bool = False, *, video: dict[
         "overall": overall,
         "overall_badge": {
             "label": overall,
-            "color": meta["color"],
-            "message": meta["message"],
+            "title": title,
+            "color": badge_color,
+            "message": message,
         },
+        "framing": framing,
         "counts": counts,
         "summary": ext.summary or "No summary generated.",
         "context": ext.context,
@@ -429,7 +481,7 @@ def build_payload(rep: Report, text: str, offline: bool = False, *, video: dict[
         text=f"YouTube: {video['title'] or video['url']}" if video else text,
         context=ext.context,
         overall=overall,
-        overall_color=meta["color"],
+        overall_color=badge_color,
         findings_count=len(formatted_findings),
         payload=payload,
     )

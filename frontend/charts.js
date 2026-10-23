@@ -29,6 +29,7 @@ const ICONS = {
   alert: '<path d="M12 4l9 16H3z"/><path d="M12 10v4.2"/><path d="M12 17.3v.2"/>',
   question: '<circle cx="12" cy="12" r="8.5"/><path d="M9.7 9.6a2.4 2.4 0 1 1 3.4 2.2c-.7.3-1.1.9-1.1 1.6v.4"/><path d="M12 16.9v.2"/>',
   minus: '<circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/>',
+  data: '<path d="M5 20v-8"/><path d="M12 20V5"/><path d="M19 20v-5"/>',
   external: '<path d="M9 7h8v8"/><path d="M17 7L7 17"/>',
 };
 
